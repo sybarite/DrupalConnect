@@ -52,7 +52,7 @@ class Query
                     // if querying by nid, then use the node/1.json exposed API
                     if (isset($this->_query['parameters']['nid']) && $this->_query['parameters']['nid']['type'] === 'equals')
                     {
-                        $requestUrl = $this->_connection->getEndpoint() . \DrupalConnect\Service\Connection\Request::ENDPOINT_NODE_RESOURCE_RETRIEVE . '1.json';
+                        $requestUrl = $this->_connection->getEndpoint() . \DrupalConnect\Service\Connection\Request::ENDPOINT_NODE_RESOURCE_RETRIEVE . $this->_query['parameters']['nid']['value'] . '.json';
 
                         $response = $this->_httpClient->resetParameters(true)
                                                       ->setUri($requestUrl)
