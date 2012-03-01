@@ -30,6 +30,13 @@ class Query
     protected $_documentType;
 
     /**
+     * Whether to hydrate or not?
+     *
+     * @var bool
+     */
+    protected $_hydrate = true;
+
+    /**
      * @var \DrupalConnect\Connection\Request
      */
     protected $_httpClient;
@@ -72,10 +79,7 @@ class Query
                             return null;
                         }
 
-                        // initialize the repository for hydration
-                        $repository = $this->_dm->getRepository($this->_documentType);
-
-                        return array($repository->getHydratedDocument($singleNode)); // return an array with 1 item node
+                        return $this->_wrapCursor(array($singleNode)); // return an array with 1 item node
                     }
                     else
                     {
@@ -92,6 +96,7 @@ class Query
                             }
                         }
 
+
                         $response = $request->request('GET');
 
                         $nodeSetData = (json_decode($response->getBody(), true));
@@ -101,17 +106,8 @@ class Query
                             return null;
                         }
 
-                        $nodeSet = array();
+                        return $this->_wrapCursor($nodeSetData);
 
-                        // initialize the repository for hydration
-                        $repository = $this->_dm->getRepository($this->_documentType);
-
-                        foreach ($nodeSetData as $n)
-                        {
-                            $nodeSet[] = $repository->getHydratedDocument($n);
-                        }
-
-                        return $nodeSet;
                     }
                 }
                 else
@@ -124,4 +120,36 @@ class Query
 
         throw new \DrupalConnect\Query\Exception("Could not execute query type: " . $this->_query['type']);
     }
+
+    /**
+     * Wrap an iterable cursor around the data
+     *
+     * @param array $documentSetData
+     * @return \DrupalConnect\Cursor
+     */
+    protected function _wrapCursor(array $documentSetData)
+    {
+        $cursor = new Cursor($this->_dm, $this->_documentType, $documentSetData);
+
+        $cursor->setHydrate($this->_hydrate);
+
+        return $cursor;
+    }
+
+    /**
+     * @param bool $hydrate
+     */
+    public function setHydrate($hydrate)
+    {
+        $this->_hydrate = $hydrate;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getHydrate()
+    {
+        return $this->_hydrate;
+    }
+
 }
