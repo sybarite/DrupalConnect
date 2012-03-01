@@ -15,6 +15,8 @@ class Builder
         'type' => \DrupalConnect\Query::TYPE_FIND,
         'parameters' => array(), // the where (filters) for the query
         'select' => array(), // fields to select (if empty, selects all fields)
+        'pageSize' => null, // Number of records to get per page
+        'page' => null, // zero-based index of the page
     );
 
     /**
@@ -150,6 +152,30 @@ class Builder
         foreach ($select as $fieldName) {
             $this->_query['select'][$fieldName] = 1;
         }
+        return $this;
+    }
+
+    /**
+     * Set the zero-based index of the page
+     *
+     * @param int $page
+     * @return Builder
+     */
+    public function page($page)
+    {
+        $this->_query['page'] = $page;
+        return $this;
+    }
+
+    /**
+     * Set the number of records to get per page
+     *
+     * @param int $pageSize
+     * @return Builder
+     */
+    public function pageSize($pageSize)
+    {
+        $this->_query['pageSize'] = $pageSize;
         return $this;
     }
 }

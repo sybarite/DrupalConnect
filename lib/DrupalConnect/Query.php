@@ -112,6 +112,18 @@ class Query
                             $request->setParameterGet('fields', implode(',', array_keys($this->_query['select'])) );
                         }
 
+                        // set the page size
+                        if ($this->_query['pageSize'])
+                        {
+                            $request->setParameterGet('pagesize', $this->_query['pageSize']);
+                        }
+
+                        // set the page number
+                        if ($this->_query['page'])
+                        {
+                            $request->setParameterGet('page', $this->_query['page']);
+                        }
+
 
                         $response = $request->request('GET');
 
