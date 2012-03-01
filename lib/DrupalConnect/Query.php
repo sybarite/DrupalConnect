@@ -61,9 +61,10 @@ class Query
         {
             case self::TYPE_FIND:
 
-                if ($this->_documentType === self::DOCUMENT_TYPE_NODE)
+                if ($this->_documentType === self::DOCUMENT_TYPE_NODE ||
+                    is_subclass_of($this->_documentType, self::DOCUMENT_TYPE_NODE))
                 {
-                    // if querying by nid, then use the node/1.json exposed API
+                    // if querying by nid, then use the $endpoint/node/1.json
                     if (isset($this->_query['parameters']['nid']) && $this->_query['parameters']['nid']['type'] === 'equals')
                     {
                         $requestUrl = $this->_connection->getEndpoint() . \DrupalConnect\Connection\Request::ENDPOINT_NODE_RESOURCE_RETRIEVE . $this->_query['parameters']['nid']['value'] . '.json';
@@ -81,19 +82,34 @@ class Query
 
                         return $this->_wrapCursor(array($singleNode)); // return an array with 1 item node
                     }
-                    else
+                    else // multiple results possible, else use the node index $endpoint/node.json?...
                     {
                         $requestUrl = $this->_connection->getEndpoint() . \DrupalConnect\Connection\Request::ENDPOINT_NODE_RESOURCE_INDEX . '.json';
 
                         $request = $this->_httpClient->resetParameters(true)
-                                                      ->setUri($requestUrl);
+                                                     ->setUri($requestUrl);
 
                         foreach ($this->_query['parameters'] as $field => $param)
                         {
                             if ($param['type'] === 'in')
                             {
-                                $request->setParameterGet("parameters[$field]", (implode(',', $param['value'])));
+                                $request->setParameterGet("parameters[$field]", implode(',', $param['value']) );
                             }
+                        }
+
+                        // if fields to be selected is explicitly defined
+                        if (count($this->_query['select']) > 1)
+                        {
+                            /**
+                                                 * Note:
+                                                 * 1 > Even if the fields are explicitly selected, the 'nid' must always be returned.
+                                                 *       This is not just important because it's the primary identifier but also because for some reason it makes
+                                                 *       the time taken for drupal to return results faster.
+                                                 *
+                                                 * 2 > Whether you like it or not, drupal will for some reason always return the 'uri' field.
+                                                 */
+                            $this->_query['select']['nid'] = 1;
+                            $request->setParameterGet('fields', implode(',', array_keys($this->_query['select'])) );
                         }
 
 

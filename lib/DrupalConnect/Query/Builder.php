@@ -14,6 +14,7 @@ class Builder
     protected $_query = array(
         'type' => \DrupalConnect\Query::TYPE_FIND,
         'parameters' => array(), // the where (filters) for the query
+        'select' => array(), // fields to select (if empty, selects all fields)
     );
 
     /**
@@ -76,6 +77,20 @@ class Builder
     }
 
     /**
+     * Get the built-query which can be executed
+     *
+     * @return \DrupalConnect\Query
+     */
+    public function getQuery()
+    {
+        $query = new \DrupalConnect\Query($this->_dm, $this->_documentType, $this->_query);
+        $query->setHydrate($this->_hydrate);
+
+        return $query;
+    }
+
+
+    /**
      * Change the query type to find and optionally set and change the class being queried.
      *
      * @return Builder
@@ -123,12 +138,18 @@ class Builder
         return $this;
     }
 
-    public function getQuery()
+    /**
+     * The fields to select.
+     *
+     * @param string $fieldName
+     * @return Builder
+     */
+    public function select($fieldName = null)
     {
-        $query = new \DrupalConnect\Query($this->_dm, $this->_documentType, $this->_query);
-        $query->setHydrate($this->_hydrate);
-
-        return $query;
+        $select = func_get_args();
+        foreach ($select as $fieldName) {
+            $this->_query['select'][$fieldName] = 1;
+        }
+        return $this;
     }
-
 }
