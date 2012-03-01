@@ -17,9 +17,9 @@ class Builder
     );
 
     /**
-     * @var \DrupalConnect\Service\Connection
+     * @var \DrupalConnect\DocumentManager
      */
-    protected $_connection;
+    protected $_dm;
 
     /**
      * @var string
@@ -34,9 +34,13 @@ class Builder
     protected $_currentField;
 
 
-    public function __construct(\DrupalConnect\Service\Connection $connection, $documentType)
+    /**
+     * @param \DrupalConnect\DocumentManager $dm
+     * @param string $documentType
+     */
+    public function __construct(\DrupalConnect\DocumentManager $dm, $documentType)
     {
-        $this->_connection = $connection;
+        $this->_dm = $dm;
         $this->_documentType = $documentType;
     }
 
@@ -102,7 +106,7 @@ class Builder
 
     public function getQuery()
     {
-        return new \DrupalConnect\Query($this->_connection, $this->_documentType, $this->_query);
+        return new \DrupalConnect\Query($this->_dm, $this->_documentType, $this->_query);
     }
 
 }
