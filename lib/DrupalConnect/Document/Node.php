@@ -4,7 +4,7 @@ namespace DrupalConnect\Document;
 /**
  * Representation of a Node document (or entity) in Drupal
  */
-class Node
+class Node extends \DrupalConnect\Document
 {
 
     // Refer http://drupanium.org/api/55 for example response data (in full node form)
@@ -39,7 +39,7 @@ class Node
 
     protected $translate;
 
-    protected $revision_timestmap;
+    protected $revision_timestamp;
 
     protected $revision_uid;
 
@@ -68,29 +68,6 @@ class Node
     protected $data;
 
     protected $path;
-
-
-//    /**
-//     *  Stores the data in the raw form as retreived from server
-//     * @var mixed
-//     */
-//    protected $_data;
-//
-//    /**
-//     * Set the data in the raw form as retreived from server
-//     *
-//     * @param $data
-//     */
-//    public function setData($data)
-//    {
-//        $this->_data = $data;
-//    }
-//
-//    public function getData()
-//    {
-//        return $this->_data;
-//    }
-
 
     public function setVid($vid)
     {
@@ -248,13 +225,13 @@ class Node
 
     public function setRevisionTimestamp($revisionTimestmap)
     {
-        $this->revision_timestmap = $revisionTimestmap;
+        $this->revision_timestamp = $revisionTimestmap;
         return $this;
     }
 
     public function getRevisionTimestmap()
     {
-        return $this->revision_timestmap;
+        return $this->revision_timestamp;
     }
 
     public function setRevisionUid($revisionUid)
