@@ -33,6 +33,12 @@ class Builder
      */
     protected $_currentField;
 
+    /**
+     * Whether to hydrate or not?
+     *
+     * @var bool
+     */
+    protected $_hydrate = true;
 
     /**
      * @param \DrupalConnect\DocumentManager $dm
@@ -80,6 +86,19 @@ class Builder
         return $this;
     }
 
+    /**
+     * Whether to hydrate this query or not
+     *
+     * @param bool $bool default true
+     * @return \DrupalConnect\Query\Builder
+     */
+    public function hydrate($bool)
+    {
+        $this->_hydrate = $bool;
+        return $this;
+    }
+
+
     public function field($field)
     {
         $this->_currentField = $field;
@@ -106,7 +125,10 @@ class Builder
 
     public function getQuery()
     {
-        return new \DrupalConnect\Query($this->_dm, $this->_documentType, $this->_query);
+        $query = new \DrupalConnect\Query($this->_dm, $this->_documentType, $this->_query);
+        $query->setHydrate($this->_hydrate);
+
+        return $query;
     }
 
 }
