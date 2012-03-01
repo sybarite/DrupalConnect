@@ -31,10 +31,27 @@ class DocumentManager
      */
     protected $_connection;
 
-    protected $_documentRepoMapping = array(
+    /**
+     * Mapping of Document --> Repository
+     *
+     * @var array
+     */
+    protected $_documentRepositoryMapping = array(
         'DrupalConnect\Document\Node' => 'DrupalConnect\Repository\Node'
     );
 
+    /**
+     * Mapping of Document --> Hydrator
+     *
+     * @var array
+     */
+    protected $_documentHydratorMapping = array(
+        'DrupalConnect\Document\Node' => 'DrupalConnect\Hydrator\Node'
+    );
+
+    /**
+     * @param Connection $connection
+     */
     public function __construct(\DrupalConnect\Connection $connection)
     {
         $this->_connection = $connection;
@@ -60,18 +77,37 @@ class DocumentManager
     }
 
     /**
+     * Get the Repository for a Document Type
+     *
      * @param $documentName
-     * @return Repository\Node
+     * @return Repository
      * @throws Exception
      */
     public function getRepository($documentName)
     {
-        if (!isset($this->_documentRepoMapping[$documentName]))
+        if (!isset($this->_documentRepositoryMapping[$documentName]))
         {
-            throw new Exception("Could not find repository for document name: $documentName");
+            throw new Exception("No registered Repository for document name: $documentName");
         }
 
-        return new \DrupalConnect\Repository\Node($this, $documentName);
+        return new $this->_documentRepositoryMapping[$documentName]($this, $documentName);
+    }
+
+    /**
+     * Get the Hydrator for a Document Type
+     *
+     * @param $documentName
+     * @return Hydrator
+     * @throws Exception
+     */
+    public function getHydrator($documentName)
+    {
+        if (!isset($this->_documentHydratorMapping[$documentName]))
+        {
+            throw new Exception("No registered Hydrator for document name: $documentName");
+        }
+
+        return new $this->_documentHydratorMapping[$documentName]($documentName);
     }
 
 
