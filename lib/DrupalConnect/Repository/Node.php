@@ -4,7 +4,7 @@ namespace DrupalConnect\Repository;
 /**
  * Repository for Node Documents
  */
-class Node extends \DrupalConnect\Repository
+class Node extends AbstractRepository
 {
     public function find($nid)
     {
@@ -15,9 +15,9 @@ class Node extends \DrupalConnect\Repository
                      ->getQuery()
                      ->execute();
 
-        if (!$result || !is_array($result))
+        if (!$result)
             return null;
 
-        return $result[0];
+        return $result->getSingleResult();
     }
 }

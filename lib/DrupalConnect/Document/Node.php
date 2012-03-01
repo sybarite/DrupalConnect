@@ -4,7 +4,7 @@ namespace DrupalConnect\Document;
 /**
  * Representation of a Node document (or entity) in Drupal
  */
-class Node extends \DrupalConnect\Document
+class Node extends AbstractDocument
 {
 
     // Refer http://drupanium.org/api/55 for example response data (in full node form)
