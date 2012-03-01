@@ -6,6 +6,10 @@ namespace DrupalConnect\Repository;
  */
 class Node extends AbstractRepository
 {
+    /**
+     * @param $nid
+     * @return null|\DrupalConnect\Document\Node
+     */
     public function find($nid)
     {
         $qb = $this->_dm->createQueryBuilder($this->_documentName);
