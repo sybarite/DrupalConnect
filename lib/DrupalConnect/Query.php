@@ -5,7 +5,7 @@ class Query
 {
     const TYPE_FIND = 1;
 
-    const DOCUMENT_TYPE_NODE = 'node';
+    const DOCUMENT_TYPE_NODE = 'DrupalConnect\Document\Node';
 
     /**
      * Array containing the query data.
@@ -15,7 +15,12 @@ class Query
     protected $_query = array();
 
     /**
-     * @var \DrupalConnect\Service\Connection
+     * @var DocumentManager
+     */
+    protected $_dm;
+
+    /**
+     * @var \DrupalConnect\Connection
      */
     protected $_connection;
 
@@ -25,14 +30,16 @@ class Query
     protected $_documentType;
 
     /**
-     * @var \DrupalConnect\Service\Connection\Request
+     * @var \DrupalConnect\Connection\Request
      */
     protected $_httpClient;
 
-    public function __construct(\DrupalConnect\Service\Connection $connection, $documentType, array $query)
+    public function __construct(\DrupalConnect\DocumentManager $dm, $documentType, array $query)
     {
+        $this->_dm = $dm;
+        $this->_connection = $dm->getConnection();
+
         $this->_query = $query;
-        $this->_connection = $connection;
         $this->_documentType = $documentType;
     }
 
@@ -40,7 +47,7 @@ class Query
     {
         if (!$this->_httpClient)
         {
-            $this->_httpClient = new \DrupalConnect\Service\Connection\Request();
+            $this->_httpClient = new \DrupalConnect\Connection\Request();
         }
 
         switch ($this->_query['type'])
@@ -52,7 +59,7 @@ class Query
                     // if querying by nid, then use the node/1.json exposed API
                     if (isset($this->_query['parameters']['nid']) && $this->_query['parameters']['nid']['type'] === 'equals')
                     {
-                        $requestUrl = $this->_connection->getEndpoint() . \DrupalConnect\Service\Connection\Request::ENDPOINT_NODE_RESOURCE_RETRIEVE . $this->_query['parameters']['nid']['value'] . '.json';
+                        $requestUrl = $this->_connection->getEndpoint() . \DrupalConnect\Connection\Request::ENDPOINT_NODE_RESOURCE_RETRIEVE . $this->_query['parameters']['nid']['value'] . '.json';
 
                         $response = $this->_httpClient->resetParameters(true)
                                                       ->setUri($requestUrl)
@@ -60,16 +67,19 @@ class Query
 
                         $singleNode = json_decode($response->getBody(), true);
 
-                        if ($singleNode) // if not false or null
+                        if (!$singleNode) // if false or null
                         {
-                            return array($singleNode); // return an array with 1 item node
+                            return null;
                         }
 
-                        return $singleNode; // if false or null
+                        // initialize the repository for hydration
+                        $repository = $this->_dm->getRepository($this->_documentType);
+
+                        return array($repository->getHydratedDocument($singleNode)); // return an array with 1 item node
                     }
                     else
                     {
-                        $requestUrl = $this->_connection->getEndpoint() . \DrupalConnect\Service\Connection\Request::ENDPOINT_NODE_RESOURCE_INDEX . '.json';
+                        $requestUrl = $this->_connection->getEndpoint() . \DrupalConnect\Connection\Request::ENDPOINT_NODE_RESOURCE_INDEX . '.json';
 
                         $request = $this->_httpClient->resetParameters(true)
                                                       ->setUri($requestUrl);
@@ -84,19 +94,34 @@ class Query
 
                         $response = $request->request('GET');
 
-                        $nodes = (json_decode($response->getBody(), true));
+                        $nodeSetData = (json_decode($response->getBody(), true));
 
-                        return $nodes;
+                        if (!$nodeSetData || !is_array($nodeSetData))
+                        {
+                            return null;
+                        }
+
+                        $nodeSet = array();
+
+                        // initialize the repository for hydration
+                        $repository = $this->_dm->getRepository($this->_documentType);
+
+                        foreach ($nodeSetData as $n)
+                        {
+                            $nodeSet[] = $repository->getHydratedDocument($n);
+                        }
+
+                        return $nodeSet;
                     }
                 }
                 else
                 {
-                    throw new \DrupalConnect\Query\Exception("Could not identify document type.");
+                    throw new \DrupalConnect\Query\Exception("Could not identify document type: {$this->_documentType}");
                 }
 
                 break;
         }
 
-        throw new \DrupalConnect\Query\Exception("Could not execute this query type.");
+        throw new \DrupalConnect\Query\Exception("Could not execute query type: " . $this->_query['type']);
     }
 }
