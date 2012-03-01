@@ -180,4 +180,21 @@ class Query
         return $this->_hydrate;
     }
 
+    /**
+     * Get the first single result from the cursor.
+     *
+     * @return Cursor|null
+     */
+    public function getSingleResult()
+    {
+        $results = $this->execute();
+
+        if ($results)
+        {
+            return $results->getSingleResult();
+        }
+
+        return $results;
+    }
+
 }
