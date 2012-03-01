@@ -1,5 +1,5 @@
 <?php
-namespace DrupalConnect\Service\Connection;
+namespace DrupalConnect\Connection;
 
 class Request extends \Zend_Http_Client
 {
@@ -8,8 +8,6 @@ class Request extends \Zend_Http_Client
 
     public function __construct()
     {
-
-
         parent::__construct(null, array(
             'adapter' => 'Zend_Http_Client_Adapter_Curl')
         );

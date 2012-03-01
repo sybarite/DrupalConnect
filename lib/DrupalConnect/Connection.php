@@ -1,5 +1,5 @@
 <?php
-namespace DrupalConnect\Service;
+namespace DrupalConnect;
 
 class Connection
 {
@@ -22,23 +22,23 @@ class Connection
      */
     protected $_config;
 
+    /**
+     * @param array $config
+     */
     public function __construct(array $config)
     {
         $this->_config = $config;
-
         $this->_endpoint = $config['endpoint'];
     }
 
-    public function createQueryBuilder($documentType)
-    {
-        return new \DrupalConnect\Query\Builder($this, $documentType);
-    }
-
+    /**
+     * Returns the endpoint URI configured
+     *
+     * @return string
+     */
     public function getEndpoint()
     {
         return $this->_endpoint;
     }
-
-
 
 }
