@@ -149,6 +149,18 @@ class Query
                         $request = $this->_httpClient->resetParameters(true)
                                                      ->setUri($requestUrl);
 
+                        // set the limit
+                        if ($this->_query['limit'])
+                        {
+                            $request->setParameterGet('limit', $this->_query['limit']);
+                        }
+
+                        // set the offset
+                        if ($this->_query['skip'])
+                        {
+                            $request->setParameterGet('offset', $this->_query['skip']);
+                        }
+
                         $response = $request->request('GET');
 
                         $nodeSetData = (json_decode($response->getBody(), true));

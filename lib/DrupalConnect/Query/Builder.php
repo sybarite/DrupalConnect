@@ -18,7 +18,10 @@ class Builder
         'pageSize' => null, // Number of records to get per page
         'page' => null, // zero-based index of the page
 
+        // -- View related queries
         'useView' => null, // name of the view to use in case a view has to be used
+        'limit' => null, // limit the number of entries to list
+        'skip' => null, // set the offset or number of entries to skip before retrieving
     );
 
     /**
@@ -190,4 +193,31 @@ class Builder
         $this->_query['useView'] = $viewName;
         return $this;
     }
+
+    /**
+     * Limit the number of entries to list.
+     * NOTE: Only supported with Views as of now.
+     *
+     * @param int $limit
+     * @return Builder
+     */
+    public function limit($limit)
+    {
+        $this->_query['limit'] = $limit;
+        return $this;
+    }
+
+    /**
+     * Set the number of records to skip
+     * NOTE: Only supported with Views as of now.
+     *
+     * @param int $skip
+     * @return Builder
+     */
+    public function skip($skip)
+    {
+        $this->_query['skip'] = $skip;
+        return $this;
+    }
+
 }
