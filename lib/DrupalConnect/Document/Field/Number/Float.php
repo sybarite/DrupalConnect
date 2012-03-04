@@ -8,6 +8,9 @@ namespace DrupalConnect\Document\Field\Number;
  */
 class Float implements \DrupalConnect\Document\Field\Number
 {
+    /**
+     * @var float
+     */
     protected $_value;
 
     /**

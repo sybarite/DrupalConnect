@@ -8,6 +8,9 @@ namespace DrupalConnect\Document\Field\Number;
  */
 class Integer implements \DrupalConnect\Document\Field\Number
 {
+    /**
+     * @var int
+     */
     protected $_value;
 
     /**
