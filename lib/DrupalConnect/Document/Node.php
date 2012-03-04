@@ -501,7 +501,7 @@ class Node extends AbstractDocument
     }
 
     /**
-     * Get the value for a custom field
+     * Get the value or value-set for a custom field
      *
      *  $options = array(
      *                  'language' => 'fr'
@@ -566,6 +566,8 @@ class Node extends AbstractDocument
         }
     }
 
+    // ----------- Functionality for getting fields of Particular Type ----------------------
+
     /**
      * Get a custom Text field
      *
@@ -622,8 +624,24 @@ class Node extends AbstractDocument
         return $this->getField($fieldName, $index, $options);
     }
 
+    /**
+     * Get a custom Boolean field
+     *
+     * @param string $fieldName
+     * @param null|int $index
+     * @param array $options Field options like language
+     * @return Field\Boolean[]|Field\Boolean|null
+     */
+    public function getBooleanField($fieldName, $index = null, array $options = array())
+    {
+        $options['type'] = 'DrupalConnect\Document\Field\Boolean';
+        return $this->getField($fieldName, $index, $options);
+    }
+
+    // ----------- Functionality for getting VALUES of a Particular Field Type ----------------------
+
      /**
-      * Get the value of a float field as a PHP value
+      * Get the value or value-set of a float field as a PHP float value
       *
       * @param string $fieldName
       * @param null|int $index
@@ -634,6 +652,19 @@ class Node extends AbstractDocument
     {
         return $this->_getNumberFieldValue($this->getFloatField($fieldName, $index, $options));
     }
+
+    /**
+     * Get the value or value-set of an integer field as a PHP integer value
+     *
+     * @param string $fieldName
+     * @param null|int $index
+     * @param array $options Field options like language
+     * @return int|int[]|null
+     */
+   public function getIntegerFieldValue($fieldName, $index = null, array $options = array())
+   {
+       return $this->_getNumberFieldValue($this->getIntegerField($fieldName, $index, $options));
+   }
 
      /**
       * Get the value of a number field or fieldset as a PHP value
@@ -668,6 +699,91 @@ class Node extends AbstractDocument
                 */
         return $fieldSet->getValue();
     }
+
+    /**
+     * Get the value or value-set of a string field as a PHP string value
+     *
+     * @param string $fieldName
+     * @param null|int $index
+     * @param array $options Field options like language
+     * @return string|string[]|null
+     */
+   public function getTextFieldValue($fieldName, $index = null, array $options = array())
+   {
+       return $this->_getTextFieldValue($this->getTextField($fieldName, $index, $options));
+   }
+
+    /**
+     * Get the value of a number field or fieldset as a PHP value
+     *
+     * @param $fieldSet
+     * @return string|string[]|null
+     */
+   public function _getTextFieldValue($fieldSet)
+   {
+       if (!$fieldSet)
+           return null;
+
+       // if multiple values returned
+       if (is_array($fieldSet))
+       {
+           $results = array();
+
+           foreach ($fieldSet as $fieldValue)
+           {
+               /**
+                           * @var Field\Text $fieldValue
+                           */
+               $results[] = $fieldValue->getValue();
+           }
+
+           return $results;
+       }
+
+       // if only one result
+       /**
+               * @var Field\Text $fieldSet
+               */
+       return $fieldSet->getValue();
+   }
+
+    /**
+     * Get the value or value-set of a boolean field as a PHP boolean value
+     *
+     * @param string $fieldName
+     * @param null|int $index
+     * @param array $options Field options like language
+     * @return boolean|boolean[]|null
+     */
+   public function getBooleanFieldValue($fieldName, $index = null, array $options = array())
+   {
+        $fieldSet = $this->getBooleanField($fieldName, $index, $options);
+
+        if (!$fieldSet)
+            return null;
+
+        // if multiple values returned
+        if (is_array($fieldSet))
+        {
+            $results = array();
+
+            foreach ($fieldSet as $fieldValue)
+            {
+                 /**
+                              * @var Field\Boolean $fieldValue
+                              */
+                 $results[] = $fieldValue->getValue();
+            }
+
+            return $results;
+        }
+
+        // if only one result
+        /**
+              * @var Field\Boolean $fieldSet
+              */
+        return $fieldSet->getValue();
+   }
 
 
 }
