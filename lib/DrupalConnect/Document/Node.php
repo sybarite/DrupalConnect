@@ -129,7 +129,7 @@ class Node extends AbstractDocument
      *
      * @var array
      */
-    protected $_body;
+    protected $_body = array();
 
 
     // -------- custom fields and feature related variables ---
@@ -394,30 +394,28 @@ class Node extends AbstractDocument
     }
 
     /**
-     * Set the body field data.
+     * Add a field-value to body
      * e.g
      *      array(
-     *          'und' => array(
-     *              0 => array(
-     *                  value => 'body_text',
-     *                  summary => 'summary_text',
-     *                  format => 'filtered_html'
-     *              )
-     *          )
+     *              value => 'body_text',
+     *              summary => 'summary_text',
+     *              format => 'filtered_html'
      *      )
      *
-     * @param $fieldData
+     * @param array $fieldData
+     * @param array|null $options language options, etc
      * @return Node
      */
-    public function setBody($fieldData)
+    public function addToBody(array $fieldData, array $options = null)
     {
-        $this->_body = $fieldData;
-        return $this;
+        $lang = (is_array($options) && isset($options['language'])) ? $options['language'] : self::LANGUAGE_NONE;
+
+        $this->_body[$lang][] = $fieldData;
     }
 
     /**
-     * @param null $index
-     * @param array|null $options
+     * @param int|null $index
+     * @param array|null $options language options, etc
      * @return Field\TextWithSummary|null
      */
     public function getBody($index = null, array $options = null)
@@ -476,16 +474,12 @@ class Node extends AbstractDocument
     }
 
     /**
-     * Set a field's data
+     * Add a field-value to a field
      * e.g
      *      array(
-     *          'und' => array(
-     *              0 => array(
-     *                  value => 'body_text',
-     *                  summary => 'summary_text',
-     *                  format => 'filtered_html'
-     *              )
-     *          )
+     *              value => 'body_text',
+     *              summary => 'summary_text',
+     *              format => 'filtered_html'
      *      )
      *
      * @param string $fieldName
