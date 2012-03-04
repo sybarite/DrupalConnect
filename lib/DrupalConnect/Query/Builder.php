@@ -17,6 +17,8 @@ class Builder
         'select' => array(), // fields to select (if empty, selects all fields)
         'pageSize' => null, // Number of records to get per page
         'page' => null, // zero-based index of the page
+
+        'useView' => null, // name of the view to use in case a view has to be used
     );
 
     /**
@@ -176,6 +178,16 @@ class Builder
     public function pageSize($pageSize)
     {
         $this->_query['pageSize'] = $pageSize;
+        return $this;
+    }
+
+    /**
+     * @param $viewName
+     * @return Builder
+     */
+    public function useView($viewName)
+    {
+        $this->_query['useView'] = $viewName;
         return $this;
     }
 }
