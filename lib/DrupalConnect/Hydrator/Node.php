@@ -41,8 +41,20 @@ class Node extends AbstractHydrator
         // if the node field 'body' is set (this is not a custom field)
         if (isset($data['body']))
         {
-            // set the body data
-            $node->setBody($data['body']);
+            // loop through every language for body
+            foreach ($data['body'] as $language => $fieldSet)
+            {
+                if ($fieldSet) // if fieldSet is not null or [] (empty array)
+                {
+                    foreach ($fieldSet as $value)
+                    {
+                        // set the body data
+                        $node->addToBody($value, array(
+                            'language' => $language
+                        ));
+                    }
+                }
+            }
         }
 
         $prefixLength = strlen(self::CUSTOM_FIELD_PREFIX);
