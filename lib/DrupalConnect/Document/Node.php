@@ -3,400 +3,670 @@ namespace DrupalConnect\Document;
 
 /**
  * Representation of a Node document (or entity) in Drupal
+ *
+ * The following references were used while building this document:
+ *     - Node (core) table: http://drupal.org/node/70591
+ *     - Comments from the 'node' mysql table for each column
+ *     - http://drupanium.org/api/55 for example response data (in full node form)
  */
 class Node extends AbstractDocument
 {
 
-    // Refer http://drupanium.org/api/55 for example response data (in full node form)
+    /**
+     * Language used when no language defined
+     */
+    const LANGUAGE_NONE = 'und';
 
-    protected $nid;
 
-    protected $vid;
+    /**
+     * The numeric ID for a node. This should always be a unique identifier
+     *
+     * @var int
+     */
+    protected $_nodeId;
 
-    protected $uid;
+    /**
+     * The numeric ID for the version of this node. This maps directly to the node_revisions table.
+     * This should always be a unique identifier.
+     *
+     * @var int
+     */
+    protected $_versionId;
 
-    protected $title;
+    /**
+     * The machine-readable form for the type for this node.
+     * For example, in Drupal a default type is "Page", but the machine readable form of that type is page
+     * (note how it is all lowercase, this is common practice).
+     *
+     * @var string
+     */
+    protected $_type;
 
-    protected $log;
+    /**
+     * The language used in the content of this node.
+     *
+     * @var string
+     */
+    protected $_language;
 
-    protected $status;
+    /**
+     * The title for this node.
+     *
+     * @var string
+     */
+    protected $_title;
 
-    protected $comment;
+    /**
+     * The ID of the user who created this node.
+     * Drupal does not change this at all after it is created.
+     * The change in possession occurs in node_revisions.
+     *
+     * @var int
+     */
+    protected $_userId;
 
-    protected $promote;
+    /**
+     * Indicates the publicity status of this node. 1 is published. 0 is unpublished.
+     *
+     * @var boolean
+     */
+    protected $_status;
 
-    protected $sticky;
+    /**
+     * When the node was created
+     *
+     * @var \DateTime
+     */
+    protected $_created;
 
-    protected $type;
+    /**
+     * When the node was last modified
+     *
+     * @var \DateTime
+     */
+    protected $_changed;
 
-    protected $language;
+    /**
+     * Whether comment is allowed on this node
+     * 0 = no, 1 = closed (read only), 2 = open (read/write).
+     *
+     * @var int
+     */
+    protected $_comment;
 
-    protected $created;
+    /**
+     * Indicates whether or not this node has been promoted to the front page.
+     *
+     * @var boolean
+     */
+    protected $_promote;
 
-    protected $changed;
+    /**
+     * Indicates whether the node should be displayed at the top of lists in which it appears.
+     *
+     * @var boolean
+     */
+    protected $_sticky;
 
-    protected $tnid;
+    /**
+     * The translation set id for this node, which equals the node id of the source post in each set.
+     *
+     * @var int
+     */
+    protected $_translationSetId;
 
-    protected $translate;
+    /**
+     * A boolean indicating whether this translation page needs to be updated.
+     *
+     * @var boolean
+     */
+    protected $_translate;
 
-    protected $revision_timestamp;
 
-    protected $revision_uid;
+    /**
+     * Stores the 'body' field defined by the node module.
+     * Note: any custom field with a name 'body' is not the same as this field. This is a special field!
+     *
+     * @var array
+     */
+    protected $_body;
 
-    protected $body;
 
-    protected $field_tags;
+    // -------- custom fields and feature related variables ---
 
-    protected $field_image;
+    /**
+     * Stores all custom fields
+     *
+     * @var array
+     */
+    protected $_fields = array();
 
-    protected $rdf_mapping;
-
-    protected $cid;
-
-    protected $last_comment_timestamp;
-
-    protected $last_comment_name;
-
-    protected $last_comment_uid;
-
-    protected $comment_count;
-
-    protected $name;
-
-    protected $picture;
-
-    protected $data;
-
-    protected $path;
-
-    public function setVid($vid)
+    /**
+     * @param int $versionId
+     * @return Node
+     */
+    public function setVersionId($versionId)
     {
-        $this->vid = $vid;
+        $this->_versionId = $versionId;
         return $this;
     }
 
-    public function getVid()
+    /**
+     * @return int
+     */
+    public function getVersionId()
     {
-        return $this->vid;
+        return $this->_versionId;
     }
 
-    public function setUid($uid)
+    /**
+     * @param \DateTime $changed
+     * @return Node
+     */
+    public function setChanged(\DateTime $changed)
     {
-        $this->uid = $uid;
+        $this->_changed = $changed;
         return $this;
     }
 
-    public function getUid()
-    {
-        return $this->uid;
-    }
-
-    public function setType($type)
-    {
-        $this->type = $type;
-        return $this;
-    }
-
-    public function getType()
-    {
-        return $this->type;
-    }
-
-    public function setTranslate($translate)
-    {
-        $this->translate = $translate;
-        return $this;
-    }
-
-    public function getTranslate()
-    {
-        return $this->translate;
-    }
-
-    public function setTnid($tnid)
-    {
-        $this->tnid = $tnid;
-        return $this;
-    }
-
-    public function getTnid()
-    {
-        return $this->tnid;
-    }
-
-    public function setTitle($title)
-    {
-        $this->title = $title;
-        return $this;
-    }
-
-    public function getTitle()
-    {
-        return $this->title;
-    }
-
-    public function setNid($nid)
-    {
-        $this->nid = $nid;
-        return $this;
-    }
-
-    public function getNid()
-    {
-        return $this->nid;
-    }
-
-    public function setBody($body)
-    {
-        $this->body = $body;
-        return $this;
-    }
-
-    public function getBody()
-    {
-        return $this->body;
-    }
-
-    public function setChanged($changed)
-    {
-        $this->changed = $changed;
-        return $this;
-    }
-
+    /**
+     * @return \DateTime
+     */
     public function getChanged()
     {
-        return $this->changed;
+        return $this->_changed;
     }
 
+    /**
+     * @param int $comment
+     * @return Node
+     */
     public function setComment($comment)
     {
-        $this->comment = $comment;
+        $this->_comment = $comment;
         return $this;
     }
 
+    /**
+     * @return int
+     */
     public function getComment()
     {
-        return $this->comment;
+        return $this->_comment;
     }
 
-    public function setCreated($created)
+    /**
+     * @param \DateTime $created
+     * @return Node
+     */
+    public function setCreated(\DateTime $created)
     {
-        $this->created = $created;
+        $this->_created = $created;
         return $this;
     }
 
+    /**
+     * @return \DateTime
+     */
     public function getCreated()
     {
-        return $this->created;
+        return $this->_created;
     }
 
+    /**
+     * @param string $language
+     * @return Node
+     */
     public function setLanguage($language)
     {
-        $this->language = $language;
+        $this->_language = $language;
         return $this;
     }
 
+    /**
+     * @return string
+     */
     public function getLanguage()
     {
-        return $this->language;
+        return $this->_language;
     }
 
-    public function setLog($log)
+    /**
+     * @param int $nodeId
+     * @return Node
+     */
+    public function setNodeId($nodeId)
     {
-        $this->log = $log;
+        $this->_nodeId = $nodeId;
         return $this;
     }
 
-    public function getLog()
+    /**
+     * @return int
+     */
+    public function getNodeId()
     {
-        return $this->log;
+        return $this->_nodeId;
     }
 
+    /**
+     * @param boolean $promote
+     * @return Node
+     */
     public function setPromote($promote)
     {
-        $this->promote = $promote;
+        $this->_promote = $promote;
         return $this;
     }
 
+    /**
+     * @return boolean
+     */
     public function getPromote()
     {
-        return $this->promote;
+        return $this->_promote;
     }
 
-    public function setRevisionTimestamp($revisionTimestmap)
-    {
-        $this->revision_timestamp = $revisionTimestmap;
-        return $this;
-    }
-
-    public function getRevisionTimestmap()
-    {
-        return $this->revision_timestamp;
-    }
-
-    public function setRevisionUid($revisionUid)
-    {
-        $this->revision_uid = $revisionUid;
-        return $this;
-    }
-
-    public function getRevisionUid()
-    {
-        return $this->revision_uid;
-    }
-
+    /**
+     * @param boolean $status
+     * @return Node
+     */
     public function setStatus($status)
     {
-        $this->status = $status;
+        $this->_status = $status;
         return $this;
     }
 
+    /**
+     * @return boolean
+     */
     public function getStatus()
     {
-        return $this->status;
+        return $this->_status;
     }
 
+    /**
+     * @param boolean $sticky
+     * @return Node
+     */
     public function setSticky($sticky)
     {
-        $this->sticky = $sticky;
+        $this->_sticky = $sticky;
         return $this;
     }
 
+    /**
+     * @return boolean
+     */
     public function getSticky()
     {
-        return $this->sticky;
+        return $this->_sticky;
     }
 
-    public function setCid($cid)
+    /**
+     * @param string $title
+     * @return Node
+     */
+    public function setTitle($title)
     {
-        $this->cid = $cid;
+        $this->_title = $title;
         return $this;
     }
 
-    public function getCid()
+    /**
+     * @return string
+     */
+    public function getTitle()
     {
-        return $this->cid;
+        return $this->_title;
     }
 
-    public function setCommentCount($comment_count)
+    /**
+     * @param int $tnid
+     * @return Node
+     */
+    public function setTranslationSetId($tnid)
     {
-        $this->comment_count = $comment_count;
+        $this->_translationSetId = $tnid;
         return $this;
     }
 
-    public function getCommentCount()
+    /**
+     * @return int
+     */
+    public function getTranslationSetId()
     {
-        return $this->comment_count;
+        return $this->_translationSetId;
     }
 
-    public function setData($data)
+    /**
+     * @param boolean $translate
+     * @return Node
+     */
+    public function setTranslate($translate)
     {
-        $this->data = $data;
+        $this->_translate = $translate;
         return $this;
     }
 
-    public function getData()
+    /**
+     * @return boolean
+     */
+    public function getTranslate()
     {
-        return $this->data;
+        return $this->_translate;
     }
 
-    public function setFieldImage($field_image)
+    /**
+     * @param string $type
+     * @return Node
+     */
+    public function setType($type)
     {
-        $this->field_image = $field_image;
+        $this->_type = $type;
         return $this;
     }
 
-    public function getFieldImage()
+    /**
+     * @return string
+     */
+    public function getType()
     {
-        return $this->field_image;
+        return $this->_type;
     }
 
-    public function setFieldTags($field_tags)
+    /**
+     * @param int $userId
+     * @return Node
+     */
+    public function setUserId($userId)
     {
-        $this->field_tags = $field_tags;
+        $this->_userId = $userId;
         return $this;
     }
 
-    public function getFieldTags()
+    /**
+     * @return int
+     */
+    public function getUserId()
     {
-        return $this->field_tags;
+        return $this->_userId;
     }
 
-    public function setLastCommentName($last_comment_name)
+    /**
+     * Set the body field data.
+     * e.g
+     *      array(
+     *          'und' => array(
+     *              0 => array(
+     *                  value => 'body_text',
+     *                  summary => 'summary_text',
+     *                  format => 'filtered_html'
+     *              )
+     *          )
+     *      )
+     *
+     * @param $fieldData
+     * @return Node
+     */
+    public function setBody($fieldData)
     {
-        $this->last_comment_name = $last_comment_name;
+        $this->_body = $fieldData;
         return $this;
     }
 
-    public function getLastCommentName()
+    /**
+     * @param null $index
+     * @param array|null $options
+     * @return Field\TextWithSummary|null
+     */
+    public function getBody($index = null, array $options = null)
     {
-        return $this->last_comment_name;
+        $lang = (is_array($options) && isset($options['language'])) ? $options['language'] : self::LANGUAGE_NONE;
+
+        // if language not set for this field
+        if (!isset($this->_body[$lang]))
+        {
+            return null;
+        }
+
+        // if all values requested
+        if ($index === null)
+        {
+            $results = array();
+
+            foreach ($this->_body[$lang] as $fieldSet)
+            {
+                $results[] = new Field\TextWithSummary($fieldSet);
+            }
+
+            return $results;
+        }
+
+        // if only one index requested
+        if (!isset($this->_body[$lang][$index]))
+        {
+            return null;
+        }
+
+        return new Field\TextWithSummary($this->_body[$lang][$index]);
     }
 
-    public function setLastCommentTimestamp($last_comment_timestamp)
+
+    // ----------- Additional Getters + Setters + Functionality ----------------------
+
+    /**
+     * Alias for getNodeId(..)
+     *
+     * @return int
+     */
+    public function getId()
     {
-        $this->last_comment_timestamp = $last_comment_timestamp;
-        return $this;
+        return $this->getNodeId();
     }
 
-    public function getLastCommentTimestamp()
+    /**
+     * Alias for setNodeId(..)
+     *
+     * @param $id
+     */
+    public function setId($id)
     {
-        return $this->last_comment_timestamp;
+        $this->setNodeId($id);
     }
 
-    public function setLastCommentUid($last_comment_uid)
+    /**
+     * Set a field's data
+     * e.g
+     *      array(
+     *          'und' => array(
+     *              0 => array(
+     *                  value => 'body_text',
+     *                  summary => 'summary_text',
+     *                  format => 'filtered_html'
+     *              )
+     *          )
+     *      )
+     *
+     * @param string $fieldName
+     * @param array $fieldData
+     * @param array|null $options
+     * @return Node
+     */
+    public function addToField($fieldName, array $fieldData, array $options = null)
     {
-        $this->last_comment_uid = $last_comment_uid;
-        return $this;
+        $lang = (is_array($options) && isset($options['language'])) ? $options['language'] : self::LANGUAGE_NONE;
+
+        $this->_fields[$fieldName][$lang][] = $fieldData;
     }
 
-    public function getLastCommentUid()
+    /**
+     * Get the value for a custom field
+     *
+     *  $options = array(
+     *                  'language' => 'fr'
+     *                  'type' => 'DrupalConnect\Document\Field\Text', // or any class that implements \DrupalConnect\Document\Field interface
+     *              )
+     *
+     * @param string $fieldName Name of the custom field
+     * @param int|null $index Index of the field value to fetch
+     * @param array|null $options Options like language, etc
+     * @return null|array|Field|Field[]
+     */
+    public function getField($fieldName, $index = null, array $options = null)
     {
-        return $this->last_comment_uid;
+        // if field not set
+        if (!isset($this->_fields[$fieldName]) )
+        {
+            return null;
+        }
+
+        $lang = (is_array($options) && isset($options['language'])) ? $options['language'] : self::LANGUAGE_NONE;
+        $fieldType = (is_array($options) && isset($options['type'])) ? $options['type'] : null;
+
+        // if language not set for this field
+        if (!isset($this->_fields[$fieldName][$lang]))
+        {
+            return null;
+        }
+
+        // if index not set, then return all results
+        if ($index === null)
+        {
+            if ($fieldType)
+            {
+                $results = array();
+
+                foreach ($this->_fields[$fieldName][$lang] as $fieldValue)
+                {
+                    $results[] = new $fieldType($fieldValue);
+                }
+
+                return $results;
+            }
+            else // return array representation of all fields
+            {
+                return $this->_fields[$fieldName][$lang];
+            }
+        }
+
+        if (!isset($this->_fields[$fieldName][$lang][$index]))
+        {
+            return null;
+        }
+
+        // if field(sub-docoument) type set, then convert to an object of that type
+        if ($fieldType)
+        {
+            return new $fieldType($this->_fields[$fieldName][$lang][$index]);
+        }
+        else // return array representation
+        {
+            return $this->_fields[$fieldName][$lang][$index];
+        }
     }
 
-    public function setName($name)
+    /**
+     * Get a custom Text field
+     *
+     * @param string $fieldName
+     * @param null|int $index
+     * @param array $options Field options like language
+     * @return Field\Text[]|Field\Text|null
+     */
+    public function getTextField($fieldName, $index = null, array $options = array())
     {
-        $this->name = $name;
-        return $this;
+        $options['type'] = 'DrupalConnect\Document\Field\Text';
+        return $this->getField($fieldName, $index, $options);
     }
 
-    public function getName()
+    /**
+     * Get a custom TextWithSummary field
+     *
+     * @param string $fieldName
+     * @param null|int $index
+     * @param array $options Field options like language
+     * @return Field\Text[]|Field\Text|null
+     */
+    public function getTextWithSummaryField($fieldName, $index = null, array $options = array())
     {
-        return $this->name;
+        $options['type'] = 'DrupalConnect\Document\Field\TextWithSummary';
+        return $this->getField($fieldName, $index, $options);
     }
 
-    public function setPath($path)
+    /**
+     * Get a custom Float field
+     *
+     * @param string $fieldName
+     * @param null|int $index
+     * @param array $options Field options like language
+     * @return Field\Number\Float[]|Field\Number\Float|null
+     */
+    public function getFloatField($fieldName, $index = null, array $options = array())
     {
-        $this->path = $path;
-        return $this;
+        $options['type'] = 'DrupalConnect\Document\Field\Number\Float';
+        return $this->getField($fieldName, $index, $options);
     }
 
-    public function getPath()
+    /**
+     * Get a custom Integer field
+     *
+     * @param string $fieldName
+     * @param null|int $index
+     * @param array $options Field options like language
+     * @return Field\Number\Integer[]|Field\Number\Integer|null
+     */
+    public function getIntegerField($fieldName, $index = null, array $options = array())
     {
-        return $this->path;
+        $options['type'] = 'DrupalConnect\Document\Field\Number\Integer';
+        return $this->getField($fieldName, $index, $options);
     }
 
-    public function setPicture($picture)
+     /**
+      * Get the value of a float field as a PHP value
+      *
+      * @param string $fieldName
+      * @param null|int $index
+      * @param array $options Field options like language
+      * @return float|float[]|null
+      */
+    public function getFloatFieldValue($fieldName, $index = null, array $options = array())
     {
-        $this->picture = $picture;
-        return $this;
+        return $this->_getNumberFieldValue($this->getFloatField($fieldName, $index, $options));
     }
 
-    public function getPicture()
+     /**
+      * Get the value of a number field or fieldset as a PHP value
+      *
+      * @param $fieldSet
+      * @return float|float[]|int|int[]|null
+      */
+    public function _getNumberFieldValue($fieldSet)
     {
-        return $this->picture;
-    }
+        if (!$fieldSet)
+            return null;
 
-    public function setRdfMapping($rdf_mapping)
-    {
-        $this->rdf_mapping = $rdf_mapping;
-        return $this;
-    }
+        // if multiple values returned
+        if (is_array($fieldSet))
+        {
+            $results = array();
 
-    public function getRdfMapping()
-    {
-        return $this->rdf_mapping;
+            foreach ($fieldSet as $fieldValue)
+            {
+                /**
+                            * @var Field\Number $fieldValue
+                            */
+                $results[] = $fieldValue->getValue();
+            }
+
+            return $results;
+        }
+
+        // if only one result
+        /**
+                * @var Field\Number $fieldSet
+                */
+        return $fieldSet->getValue();
     }
 
 
