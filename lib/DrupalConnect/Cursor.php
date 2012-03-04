@@ -84,6 +84,18 @@ class Cursor implements Iterator
     }
 
     /**
+     * Set the hydrator to be used
+     *
+     * @param Hydrator $hydrator
+     */
+    public function setHydrator(Hydrator $hydrator)
+    {
+        $this->_hydrator = $hydrator;
+    }
+
+    /**
+     * Initialize once and return the hydrator to be used
+     *
      * @return Hydrator
      */
     protected function _getHydrator()
