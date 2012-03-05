@@ -4,7 +4,7 @@ namespace DrupalConnect\Hydrator;
 use \DrupalConnect\Mapping\TypeManager as TypeManager;
 
 /**
- * Hydrates a Node
+ * Hydrates Node data that is received from the default endpoints provided by the Services v3 module
  */
 class Node extends AbstractHydrator
 {
@@ -34,15 +34,27 @@ class Node extends AbstractHydrator
              ->setChanged(TypeManager::getType('date')->convertToPHPValue($data['changed']))
              ->setComment(TypeManager::getType('integer')->convertToPHPValue($data['comment']))
              ->setPromote(TypeManager::getType('boolean')->convertToPHPValue($data['promote']))
-             ->setSticky(TypeManager::getType('boolean')->convertToPHPValue($data['sticky']))
-             ->setTranslationSetId(TypeManager::getType('integer')->convertToPHPValue($data['tnid']))
-             ->setTranslate(TypeManager::getType('boolean')->convertToPHPValue($data['translate']));
+             ->setSticky(TypeManager::getType('boolean')->convertToPHPValue($data['sticky']));
+             //->setTranslationSetId(TypeManager::getType('integer')->convertToPHPValue($data['tnid']))
+             //->setTranslate(TypeManager::getType('boolean')->convertToPHPValue($data['translate']));
 
         // if the node field 'body' is set (this is not a custom field)
         if (isset($data['body']))
         {
-            // set the body data
-            $node->setBody($data['body']);
+            // loop through every language for body
+            foreach ($data['body'] as $language => $fieldSet)
+            {
+                if ($fieldSet) // if fieldSet is not null or [] (empty array)
+                {
+                    foreach ($fieldSet as $value)
+                    {
+                        // set the body data
+                        $node->addToBody($value, array(
+                            'language' => $language
+                        ));
+                    }
+                }
+            }
         }
 
         $prefixLength = strlen(self::CUSTOM_FIELD_PREFIX);

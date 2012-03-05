@@ -108,19 +108,19 @@ class Node extends AbstractDocument
      */
     protected $_sticky;
 
-    /**
-     * The translation set id for this node, which equals the node id of the source post in each set.
-     *
-     * @var int
-     */
-    protected $_translationSetId;
-
-    /**
-     * A boolean indicating whether this translation page needs to be updated.
-     *
-     * @var boolean
-     */
-    protected $_translate;
+//    /**
+//     * The translation set id for this node, which equals the node id of the source post in each set.
+//     *
+//     * @var int
+//     */
+//    protected $_translationSetId;
+//
+//    /**
+//     * A boolean indicating whether this translation page needs to be updated.
+//     *
+//     * @var boolean
+//     */
+//    protected $_translate;
 
 
     /**
@@ -129,7 +129,7 @@ class Node extends AbstractDocument
      *
      * @var array
      */
-    protected $_body;
+    protected $_body = array();
 
 
     // -------- custom fields and feature related variables ---
@@ -321,41 +321,41 @@ class Node extends AbstractDocument
         return $this->_title;
     }
 
-    /**
-     * @param int $tnid
-     * @return Node
-     */
-    public function setTranslationSetId($tnid)
-    {
-        $this->_translationSetId = $tnid;
-        return $this;
-    }
-
-    /**
-     * @return int
-     */
-    public function getTranslationSetId()
-    {
-        return $this->_translationSetId;
-    }
-
-    /**
-     * @param boolean $translate
-     * @return Node
-     */
-    public function setTranslate($translate)
-    {
-        $this->_translate = $translate;
-        return $this;
-    }
-
-    /**
-     * @return boolean
-     */
-    public function getTranslate()
-    {
-        return $this->_translate;
-    }
+//    /**
+//     * @param int $tnid
+//     * @return Node
+//     */
+//    public function setTranslationSetId($tnid)
+//    {
+//        $this->_translationSetId = $tnid;
+//        return $this;
+//    }
+//
+//    /**
+//     * @return int
+//     */
+//    public function getTranslationSetId()
+//    {
+//        return $this->_translationSetId;
+//    }
+//
+//    /**
+//     * @param boolean $translate
+//     * @return Node
+//     */
+//    public function setTranslate($translate)
+//    {
+//        $this->_translate = $translate;
+//        return $this;
+//    }
+//
+//    /**
+//     * @return boolean
+//     */
+//    public function getTranslate()
+//    {
+//        return $this->_translate;
+//    }
 
     /**
      * @param string $type
@@ -394,30 +394,28 @@ class Node extends AbstractDocument
     }
 
     /**
-     * Set the body field data.
+     * Add a field-value to body
      * e.g
      *      array(
-     *          'und' => array(
-     *              0 => array(
-     *                  value => 'body_text',
-     *                  summary => 'summary_text',
-     *                  format => 'filtered_html'
-     *              )
-     *          )
+     *              value => 'body_text',
+     *              summary => 'summary_text',
+     *              format => 'filtered_html'
      *      )
      *
-     * @param $fieldData
+     * @param array $fieldData
+     * @param array|null $options language options, etc
      * @return Node
      */
-    public function setBody($fieldData)
+    public function addToBody(array $fieldData, array $options = null)
     {
-        $this->_body = $fieldData;
-        return $this;
+        $lang = (is_array($options) && isset($options['language'])) ? $options['language'] : self::LANGUAGE_NONE;
+
+        $this->_body[$lang][] = $fieldData;
     }
 
     /**
-     * @param null $index
-     * @param array|null $options
+     * @param int|null $index
+     * @param array|null $options language options, etc
      * @return Field\TextWithSummary|null
      */
     public function getBody($index = null, array $options = null)
@@ -476,16 +474,12 @@ class Node extends AbstractDocument
     }
 
     /**
-     * Set a field's data
+     * Add a field-value to a field
      * e.g
      *      array(
-     *          'und' => array(
-     *              0 => array(
-     *                  value => 'body_text',
-     *                  summary => 'summary_text',
-     *                  format => 'filtered_html'
-     *              )
-     *          )
+     *              value => 'body_text',
+     *              summary => 'summary_text',
+     *              format => 'filtered_html'
      *      )
      *
      * @param string $fieldName
