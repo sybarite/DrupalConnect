@@ -23,20 +23,63 @@ class Node extends AbstractHydrator
          */
         $node = new $this->_documentName();
 
-        $node->setNodeId(TypeManager::getType('integer')->convertToPHPValue($data['nid']))
-             ->setVersionId(TypeManager::getType('integer')->convertToPHPValue($data['vid']))
-             ->setType(TypeManager::getType('string')->convertToPHPValue($data['type']))
-             ->setLanguage(TypeManager::getType('string')->convertToPHPValue($data['language']))
-             ->setTitle(TypeManager::getType('string')->convertToPHPValue($data['title']))
-             ->setUserId(TypeManager::getType('integer')->convertToPHPValue($data['uid']))
-             ->setStatus(TypeManager::getType('boolean')->convertToPHPValue($data['status']))
-             ->setCreated(TypeManager::getType('date')->convertToPHPValue($data['created']))
-             ->setChanged(TypeManager::getType('date')->convertToPHPValue($data['changed']))
-             ->setComment(TypeManager::getType('integer')->convertToPHPValue($data['comment']))
-             ->setPromote(TypeManager::getType('boolean')->convertToPHPValue($data['promote']))
-             ->setSticky(TypeManager::getType('boolean')->convertToPHPValue($data['sticky']));
-             //->setTranslationSetId(TypeManager::getType('integer')->convertToPHPValue($data['tnid']))
-             //->setTranslate(TypeManager::getType('boolean')->convertToPHPValue($data['translate']));
+        // node id is (and must be) always returned
+        $node->setNodeId(TypeManager::getType('integer')->convertToPHPValue($data['nid']));
+
+        if (isset($data['vid']))
+        {
+            $node->setVersionId(TypeManager::getType('integer')->convertToPHPValue($data['vid']));
+        }
+
+        if (isset($data['type']))
+        {
+            $node->setType(TypeManager::getType('string')->convertToPHPValue($data['type']));
+        }
+
+        if (isset($data['language']))
+        {
+            $node->setLanguage(TypeManager::getType('string')->convertToPHPValue($data['language']));
+        }
+
+        if (isset($data['title']))
+        {
+            $node->setTitle(TypeManager::getType('string')->convertToPHPValue($data['title']));
+        }
+
+        if (isset($data['uid']))
+        {
+            $node->setUserId(TypeManager::getType('integer')->convertToPHPValue($data['uid']));
+        }
+
+        if (isset($data['status']))
+        {
+            $node->setStatus(TypeManager::getType('boolean')->convertToPHPValue($data['status']));
+        }
+
+        if (isset($data['created']))
+        {
+            $node->setCreated(TypeManager::getType('date')->convertToPHPValue($data['created']));
+        }
+
+        if (isset($data['changed']))
+        {
+            $node->setChanged(TypeManager::getType('date')->convertToPHPValue($data['changed']));
+        }
+
+        if (isset($data['comment']))
+        {
+            $node->setComment(TypeManager::getType('integer')->convertToPHPValue($data['comment']));
+        }
+
+        if (isset($data['promote']))
+        {
+            $node->setPromote(TypeManager::getType('boolean')->convertToPHPValue($data['promote']));
+        }
+
+        if (isset($data['sticky']))
+        {
+            $node->setSticky(TypeManager::getType('boolean')->convertToPHPValue($data['sticky']));
+        }
 
         // if the node field 'body' is set (this is not a custom field)
         if (isset($data['body']))
