@@ -101,16 +101,16 @@ class Query
                             }
 
                             // if fields to be selected is explicitly defined
-                            if (count($this->_query['select']) > 1)
+                            if (count($this->_query['select']) > 0)
                             {
                                 /**
-                                                     * Note:
-                                                     * 1 > Even if the fields are explicitly selected, the 'nid' must always be returned.
-                                                     *       This is not just important because it's the primary identifier but also because for some reason it makes
-                                                     *       the time taken for drupal to return results faster.
-                                                     *
-                                                     * 2 > Whether you like it or not, drupal will for some reason always return the 'uri' field.
-                                                     */
+                                 * Note:
+                                 * 1 > Even if the fields are explicitly selected, the 'nid' must always be returned.
+                                 *       This is not just important because it's the primary identifier but also because for some reason it makes
+                                 *       the time taken for drupal to return results faster.
+                                 *
+                                 * 2 > Whether you like it or not, drupal will for some reason always return the 'uri' field.
+                                 */
                                 $this->_query['select']['nid'] = 1;
                                 $request->setParameterGet('fields', implode(',', array_keys($this->_query['select'])) );
                             }
