@@ -94,8 +94,17 @@ class Query
 
                             foreach ($this->_query['parameters'] as $field => $param)
                             {
-                                if ($param['type'] === 'in')
+                                if ($param['type'] === 'equals')
                                 {
+                                    $request->setParameterGet("parameters[$field]", $this->_convertToDrupalValue($param['value']) );
+                                }
+                                else if ($param['type'] === 'in')
+                                {
+                                    foreach ($param['value'] as $key => $val) // convert the IN values to drupal equivalent values first
+                                    {
+                                        $param['value'][$key] = $this->_convertToDrupalValue($val);
+                                    }
+
                                     $request->setParameterGet("parameters[$field]", implode(',', $param['value']) );
                                 }
                             }
@@ -247,5 +256,37 @@ class Query
 
         return $results;
     }
+
+    /**
+     * Convert a query builder field value to it's equivalent drupal request variable value.
+     * For e.g DateTime is converted to a timestamp
+     *
+     * @param $value
+     * @return \DateTime|int|string|null
+     */
+    protected function _convertToDrupalValue($value)
+    {
+        switch(gettype($value))
+        {
+            case 'boolean':
+                return (int)$value;
+
+            case 'object':
+
+                switch(get_class($value))
+                {
+                    case 'DateTime':
+                        /**
+                         * @var \DateTime $value
+                         */
+                        return $value->getTimestamp();
+                }
+
+                break;
+        }
+
+        return $value;
+    }
+
 
 }
