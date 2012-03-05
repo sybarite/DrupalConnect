@@ -161,6 +161,15 @@ class Query
                             $request->setParameterGet('offset', $this->_query['skip']);
                         }
 
+                        // set the contextual filters
+                        if ($this->_query['contextualFilters'])
+                        {
+                            foreach ($this->_query['contextualFilters'] as $index => $filter)
+                            {
+                                $request->setParameterGet("args[$index]", $filter);
+                            }
+                        }
+
                         $response = $request->request('GET');
 
                         $nodeSetData = (json_decode($response->getBody(), true));

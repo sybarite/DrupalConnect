@@ -22,6 +22,7 @@ class Builder
         'useView' => null, // name of the view to use in case a view has to be used
         'limit' => null, // limit the number of entries to list
         'skip' => null, // set the offset or number of entries to skip before retrieving
+        'contextualFilters' => null, // set the contextual filters to be passed (must be array)
     );
 
     /**
@@ -217,6 +218,18 @@ class Builder
     public function skip($skip)
     {
         $this->_query['skip'] = $skip;
+        return $this;
+    }
+
+    /**
+     * Set the contextual filters to be used
+     *
+     * @param array $filterValues
+     * @return Builder
+     */
+    public function contextualFilters(array $filterValues)
+    {
+        $this->_query['contextualFilters'] = $filterValues;
         return $this;
     }
 
