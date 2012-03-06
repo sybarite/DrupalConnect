@@ -37,7 +37,8 @@ class DocumentManager
      * @var array
      */
     protected $_documentRepositoryMapping = array(
-        'DrupalConnect\Document\Node' => 'DrupalConnect\Repository\Node'
+        'DrupalConnect\Document\Node' => 'DrupalConnect\Repository\Node',
+        'DrupalConnect\Document\File' => 'DrupalConnect\Repository\File'
     );
 
     /**
@@ -46,7 +47,8 @@ class DocumentManager
      * @var array
      */
     protected $_documentHydratorMapping = array(
-        'DrupalConnect\Document\Node' => 'DrupalConnect\Hydrator\Node'
+        'DrupalConnect\Document\Node' => 'DrupalConnect\Hydrator\Node',
+        'DrupalConnect\Document\File' => 'DrupalConnect\Hydrator\File'
     );
 
     /**

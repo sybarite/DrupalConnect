@@ -8,6 +8,9 @@ class Request extends \Zend_Http_Client
 
     const ENDPOINT_NODE_VIEW_RETRIEVE = 'views/'; // example views/article_recent.json
 
+    const ENDPOINT_FILE_RESOURCE_RETRIEVE = 'file/'; // example node/1.json
+    const ENDPOINT_FILE_RESOURCE_INDEX = 'file';
+
     public function __construct()
     {
         parent::__construct(null, array(
