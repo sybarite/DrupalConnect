@@ -27,7 +27,7 @@ class Node extends AbstractRepository
     }
 
     /**
-     * Query for one or more nodes based on several conditions that form a logical conjunction
+     * Query for a single node based on several conditions that form a logical conjunction
      *
      * @param array $criteria
      * @return array|null
@@ -56,6 +56,12 @@ class Node extends AbstractRepository
         return $this->find($partialNode['nid']);
     }
 
+    /**
+     * Query for one or more nodes based on several conditions that form a logical conjunction
+     *
+     * @param array $criteria
+     * @return array|null
+     */
     public function findBy(array $criteria)
     {
         // if only the nid criteria is set, then use the ->find($nid) for faster results (since only 1 request needed and 1 result expected)
