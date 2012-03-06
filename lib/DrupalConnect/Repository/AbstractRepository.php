@@ -28,4 +28,14 @@ class AbstractRepository implements \DrupalConnect\Repository
         $this->_dm = $dm;
         $this->_documentName = $documentName;
     }
+
+    /**
+     * Initialize and get a query builder for the document name this repository handles
+     *
+     * @return \DrupalConnect\Query\Builder
+     */
+    public function createQueryBuilder()
+    {
+        return $this->_dm->createQueryBuilder($this->_documentName);
+    }
 }
