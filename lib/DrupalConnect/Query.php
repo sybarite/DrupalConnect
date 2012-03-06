@@ -179,6 +179,30 @@ class Query
                             }
                         }
 
+                        // set the exposed filters
+                        foreach ($this->_query['filters'] as $field => $param)
+                        {
+                            // if simple value passed
+                            if (!is_array($param))
+                            {
+                                $request->setParameterGet("filters[$field]", $this->_convertToDrupalExposedFilterValue($param['value']) );
+                            }
+                            else
+                            {
+                                if (isset($param['operator'])) // if operator is set
+                                {
+                                    $request->setParameterGet("filters[{$field}_op]", $this->_convertToDrupalExposedFilterValue($param['operator']));
+                                    unset($param['operator']);
+                                }
+
+                                // if filter value a range, etc
+                                foreach ($param as $key => $val)
+                                {
+                                    $request->setParameterGet("filters[$field][$key]", $this->_convertToDrupalExposedFilterValue($val) );
+                                }
+                            }
+                        }
+
                         $response = $request->request('GET');
 
                         $nodeSetData = (json_decode($response->getBody(), true));
@@ -288,5 +312,35 @@ class Query
         return $value;
     }
 
+    /**
+     * Convert a query builder filter value to it's equivalent drupal exposed filter request variable value.
+     * The reason this is a separate function cause DateTime for example are represented differently
+     *
+     * @param $value
+     * @return \DateTime|int|string|null
+     */
+    protected function _convertToDrupalExposedFilterValue($value)
+    {
+        switch(gettype($value))
+        {
+            case 'boolean':
+                return (int)$value;
+
+            case 'object':
+
+                switch(get_class($value))
+                {
+                    case 'DateTime':
+                        /**
+                         * @var \DateTime $value
+                         */
+                        return date( 'Y-m-d H:i:s', $value->getTimestamp());
+                }
+
+                break;
+        }
+
+        return $value;
+    }
 
 }

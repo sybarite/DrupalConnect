@@ -23,6 +23,7 @@ class Builder
         'limit' => null, // limit the number of entries to list
         'skip' => null, // set the offset or number of entries to skip before retrieving
         'contextualFilters' => null, // set the contextual filters to be passed (must be array)
+        'filters' => array()
     );
 
     /**
@@ -36,11 +37,18 @@ class Builder
     protected $_documentType;
 
     /**
-     * The current field we are operating on.
+     * The current 'field' we are operating on.
      *
      * @var string
      */
     protected $_currentField;
+
+    /**
+     * The current 'filter' we are operating on.
+     *
+     * @var string
+     */
+    protected $_currentFilter;
 
     /**
      * Whether to hydrate or not?
@@ -122,6 +130,12 @@ class Builder
     }
 
 
+    /**
+     * Set the current field to operate on.
+     *
+     * @param $field
+     * @return Builder
+     */
     public function field($field)
     {
         $this->_currentField = $field;
@@ -230,6 +244,39 @@ class Builder
     public function contextualFilters(array $filterValues)
     {
         $this->_query['contextualFilters'] = $filterValues;
+        return $this;
+    }
+
+    /**
+     * Set the current filter to operate on.
+     *
+     * @param string $filterIdentifier
+     * @return Builder
+     */
+    public function filter($filterIdentifier)
+    {
+        $this->_currentFilter = $filterIdentifier;
+        return $this;
+    }
+
+    /**
+     * Set the value for the current filter
+     *
+     * @param $value
+     * @return Builder
+     */
+    public function value($value)
+    {
+        if (is_array($value))
+        {
+            $this->_query['filters'][$this->_currentFilter] = $value;
+        }
+        else
+        {
+            $this->_query['filters'][$this->_currentFilter] = array(
+                                                                    'value' => $value
+                                                                );
+        }
         return $this;
     }
 
