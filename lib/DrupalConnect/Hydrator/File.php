@@ -14,7 +14,7 @@ class File extends AbstractHydrator
      * Get the hydrated version of the document.
      *
      * @param array $data
-     * @return \DrupalConnect\Document\Node
+     * @return \DrupalConnect\Document\File
      */
     public function hydrate(array $data)
     {

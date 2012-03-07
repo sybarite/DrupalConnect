@@ -30,7 +30,7 @@ class Node extends AbstractRepository
      * Query for a single node based on several conditions that form a logical conjunction
      *
      * @param array $criteria
-     * @return array|null
+     * @return \DrupalConnect\Document\Node|null
      */
     public function findOneBy(array $criteria)
     {
@@ -60,7 +60,7 @@ class Node extends AbstractRepository
      * Query for one or more nodes based on several conditions that form a logical conjunction
      *
      * @param array $criteria
-     * @return array|null
+     * @return \DrupalConnect\Document\Node[]|null
      */
     public function findBy(array $criteria)
     {
