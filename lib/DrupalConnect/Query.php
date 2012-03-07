@@ -111,7 +111,7 @@ class Query
 
                 return $this->_wrapCursor(array($singleNode)); // return an array with 1 item node
             }
-            else // multiple results possible, else use the node index $endpoint/node.json?...
+            else // multiple results possible, so use the node index $endpoint/node.json?...
             {
                 $requestUrl = $this->_connection->getEndpoint() . \DrupalConnect\Connection\Request::ENDPOINT_NODE_RESOURCE_INDEX . '.json';
 
@@ -255,9 +255,13 @@ class Query
         {
             $requestUrl = $this->_connection->getEndpoint() . \DrupalConnect\Connection\Request::ENDPOINT_FILE_RESOURCE_RETRIEVE . $this->_query['parameters']['fid']['value'] . '.json';
 
-            $response = $this->_httpClient->resetParameters(true)
-                                          ->setUri($requestUrl)
-                                          ->request('GET');
+            $request = $this->_httpClient->resetParameters(true)
+                                          ->setUri($requestUrl);
+
+
+            $request->setParameterGet('file_contents', 0);
+
+            $response = $request->request('GET');
 
             $singleFile = json_decode($response->getBody(), true);
 
@@ -268,7 +272,79 @@ class Query
 
             return $this->_wrapCursor(array($singleFile)); // return an array with 1 item file
         }
-        exit("implementation for querying multiple files pending");
+        else // multiple results possible, so use the file index $endpoint/file.json?...
+        {
+            $requestUrl = $this->_connection->getEndpoint() . \DrupalConnect\Connection\Request::ENDPOINT_FILE_RESOURCE_INDEX . '.json';
+
+            $request = $this->_httpClient->resetParameters(true)
+                                         ->setUri($requestUrl);
+
+            foreach ($this->_query['parameters'] as $field => $param)
+            {
+                if ($param['type'] === 'equals')
+                {
+                    $request->setParameterGet("parameters[$field]", $this->_convertToDrupalValue($param['value']) );
+                }
+                else if ($param['type'] === 'in')
+                {
+                    foreach ($param['value'] as $key => $val) // convert the IN values to drupal equivalent values first
+                    {
+                        $param['value'][$key] = $this->_convertToDrupalValue($val);
+                    }
+
+                    $request->setParameterGet("parameters[$field]", implode(',', $param['value']) );
+                }
+            }
+
+            // if fields to be selected is explicitly defined
+            if (count($this->_query['select']) > 0)
+            {
+                /**
+                 * Note:
+                 * 1 > Even if the fields are explicitly selected, the 'nid' must always be returned.
+                 *       This is not just important because it's the primary identifier but also because for some reason it makes
+                 *       the time taken for drupal to return results faster.
+                 *
+                 * 2 > Whether you like it or not, drupal will for some reason always return the 'uri' field.
+                 */
+                $this->_query['select']['fid'] = 1;
+                $request->setParameterGet('fields', implode(',', array_keys($this->_query['select'])) );
+            }
+
+            // set the page size
+            if ($this->_query['pageSize'])
+            {
+                $request->setParameterGet('pagesize', $this->_query['pageSize']);
+            }
+
+            // set the page number
+            if ($this->_query['page'])
+            {
+                $request->setParameterGet('page', $this->_query['page']);
+            }
+
+
+            $response = $request->request('GET');
+
+            $nodeSetData = (json_decode($response->getBody(), true));
+
+            if (!$nodeSetData || !is_array($nodeSetData))
+            {
+                return null;
+            }
+
+            // remove the uri since the uri received from the index resource is not what we want
+            foreach ($nodeSetData as $index => $f)
+            {
+                if (isset($f['uri']))
+                {
+                    unset($nodeSetData[$index]['uri']);
+                }
+            }
+
+            return $this->_wrapCursor($nodeSetData);
+
+        }
     }
 
     /**
