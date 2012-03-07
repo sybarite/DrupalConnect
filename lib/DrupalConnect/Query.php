@@ -250,79 +250,157 @@ class Query
      */
     protected function _executeFileFind()
     {
-        // if querying by nid, then use the $endpoint/node/1.json where only ONE result is returned
-        if (isset($this->_query['parameters']['fid']) && $this->_query['parameters']['fid']['type'] === 'equals')
+        // if no VIEW selected
+        if (!$this->_query['useView'])
         {
-            $requestUrl = $this->_connection->getEndpoint() . \DrupalConnect\Connection\Request::ENDPOINT_FILE_RESOURCE_RETRIEVE . $this->_query['parameters']['fid']['value'] . '.json';
-
-            $request = $this->_httpClient->resetParameters(true)
-                                          ->setUri($requestUrl);
-
-
-            $request->setParameterGet('file_contents', 0);
-
-            $response = $request->request('GET');
-
-            $singleFile = json_decode($response->getBody(), true);
-
-            if (!$singleFile) // if false or null
+            // if querying by nid, then use the $endpoint/node/1.json where only ONE result is returned
+            if (isset($this->_query['parameters']['fid']) && $this->_query['parameters']['fid']['type'] === 'equals')
             {
-                return null;
-            }
+                $requestUrl = $this->_connection->getEndpoint() . \DrupalConnect\Connection\Request::ENDPOINT_FILE_RESOURCE_RETRIEVE . $this->_query['parameters']['fid']['value'] . '.json';
 
-            return $this->_wrapCursor(array($singleFile)); // return an array with 1 item file
+                $request = $this->_httpClient->resetParameters(true)
+                                              ->setUri($requestUrl);
+
+
+                $request->setParameterGet('file_contents', 0);
+
+                $response = $request->request('GET');
+
+                $singleFile = json_decode($response->getBody(), true);
+
+                if (!$singleFile) // if false or null
+                {
+                    return null;
+                }
+
+                return $this->_wrapCursor(array($singleFile)); // return an array with 1 item file
+            }
+            else // multiple results possible, so use the file index $endpoint/file.json?...
+            {
+                $requestUrl = $this->_connection->getEndpoint() . \DrupalConnect\Connection\Request::ENDPOINT_FILE_RESOURCE_INDEX . '.json';
+
+                $request = $this->_httpClient->resetParameters(true)
+                                             ->setUri($requestUrl);
+
+                foreach ($this->_query['parameters'] as $field => $param)
+                {
+                    if ($param['type'] === 'equals')
+                    {
+                        $request->setParameterGet("parameters[$field]", $this->_convertToDrupalValue($param['value']) );
+                    }
+                    else if ($param['type'] === 'in')
+                    {
+                        foreach ($param['value'] as $key => $val) // convert the IN values to drupal equivalent values first
+                        {
+                            $param['value'][$key] = $this->_convertToDrupalValue($val);
+                        }
+
+                        $request->setParameterGet("parameters[$field]", implode(',', $param['value']) );
+                    }
+                }
+
+                // if fields to be selected is explicitly defined
+                if (count($this->_query['select']) > 0)
+                {
+                    /**
+                     * Note:
+                     * 1 > Even if the fields are explicitly selected, the 'nid' must always be returned.
+                     *       This is not just important because it's the primary identifier but also because for some reason it makes
+                     *       the time taken for drupal to return results faster.
+                     *
+                     * 2 > Whether you like it or not, drupal will for some reason always return the 'uri' field.
+                     */
+                    $this->_query['select']['fid'] = 1;
+                    $request->setParameterGet('fields', implode(',', array_keys($this->_query['select'])) );
+                }
+
+                // set the page size
+                if ($this->_query['pageSize'])
+                {
+                    $request->setParameterGet('pagesize', $this->_query['pageSize']);
+                }
+
+                // set the page number
+                if ($this->_query['page'])
+                {
+                    $request->setParameterGet('page', $this->_query['page']);
+                }
+
+
+                $response = $request->request('GET');
+
+                $nodeSetData = (json_decode($response->getBody(), true));
+
+                if (!$nodeSetData || !is_array($nodeSetData))
+                {
+                    return null;
+                }
+
+                // remove the uri since the uri received from the index resource is not what we want
+                foreach ($nodeSetData as $index => $f)
+                {
+                    if (isset($f['uri']))
+                    {
+                        unset($nodeSetData[$index]['uri']);
+                    }
+                }
+
+                return $this->_wrapCursor($nodeSetData);
+
+            }
         }
-        else // multiple results possible, so use the file index $endpoint/file.json?...
-        {
-            $requestUrl = $this->_connection->getEndpoint() . \DrupalConnect\Connection\Request::ENDPOINT_FILE_RESOURCE_INDEX . '.json';
+        else
+        { // a VIEW is to be used for the find
+
+            $requestUrl = $this->_connection->getEndpoint() . \DrupalConnect\Connection\Request::ENDPOINT_NODE_VIEW_RETRIEVE . $this->_query['useView'] . '.json';
 
             $request = $this->_httpClient->resetParameters(true)
                                          ->setUri($requestUrl);
 
-            foreach ($this->_query['parameters'] as $field => $param)
+            // set the limit
+            if ($this->_query['limit'])
             {
-                if ($param['type'] === 'equals')
+                $request->setParameterGet('limit', $this->_query['limit']);
+            }
+
+            // set the offset
+            if ($this->_query['skip'])
+            {
+                $request->setParameterGet('offset', $this->_query['skip']);
+            }
+
+            // set the contextual filters
+            if ($this->_query['contextualFilters'])
+            {
+                foreach ($this->_query['contextualFilters'] as $index => $filter)
                 {
-                    $request->setParameterGet("parameters[$field]", $this->_convertToDrupalValue($param['value']) );
+                    $request->setParameterGet("args[$index]", $filter);
                 }
-                else if ($param['type'] === 'in')
+            }
+
+            // set the exposed filters
+            foreach ($this->_query['filters'] as $field => $param)
+            {
+                // if simple value passed
+                if (!is_array($param))
                 {
-                    foreach ($param['value'] as $key => $val) // convert the IN values to drupal equivalent values first
+                    $request->setParameterGet("filters[$field]", $this->_convertToDrupalExposedFilterValue($param['value']) );
+                }
+                else
+                {
+                    if (isset($param['operator'])) // if operator is set
                     {
-                        $param['value'][$key] = $this->_convertToDrupalValue($val);
+                        $request->setParameterGet("filters[{$field}_op]", $this->_convertToDrupalExposedFilterValue($param['operator']));
+                        unset($param['operator']);
                     }
 
-                    $request->setParameterGet("parameters[$field]", implode(',', $param['value']) );
+                    // if filter value a range, etc
+                    foreach ($param as $key => $val)
+                    {
+                        $request->setParameterGet("filters[$field][$key]", $this->_convertToDrupalExposedFilterValue($val) );
+                    }
                 }
             }
-
-            // if fields to be selected is explicitly defined
-            if (count($this->_query['select']) > 0)
-            {
-                /**
-                 * Note:
-                 * 1 > Even if the fields are explicitly selected, the 'nid' must always be returned.
-                 *       This is not just important because it's the primary identifier but also because for some reason it makes
-                 *       the time taken for drupal to return results faster.
-                 *
-                 * 2 > Whether you like it or not, drupal will for some reason always return the 'uri' field.
-                 */
-                $this->_query['select']['fid'] = 1;
-                $request->setParameterGet('fields', implode(',', array_keys($this->_query['select'])) );
-            }
-
-            // set the page size
-            if ($this->_query['pageSize'])
-            {
-                $request->setParameterGet('pagesize', $this->_query['pageSize']);
-            }
-
-            // set the page number
-            if ($this->_query['page'])
-            {
-                $request->setParameterGet('page', $this->_query['page']);
-            }
-
 
             $response = $request->request('GET');
 
@@ -333,17 +411,8 @@ class Query
                 return null;
             }
 
-            // remove the uri since the uri received from the index resource is not what we want
-            foreach ($nodeSetData as $index => $f)
-            {
-                if (isset($f['uri']))
-                {
-                    unset($nodeSetData[$index]['uri']);
-                }
-            }
-
-            return $this->_wrapCursor($nodeSetData);
-
+            // wrap with cursor, BUT USE a CUSTOM HYDRATOR since Node data from views has a different representation
+            return $this->_wrapCursor($nodeSetData, 'DrupalConnect\Hydrator\Views\File');
         }
     }
 
