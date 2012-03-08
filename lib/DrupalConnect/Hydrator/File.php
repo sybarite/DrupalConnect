@@ -76,7 +76,7 @@ class File extends AbstractHydrator
         $stream = substr($uri, 0, $index);
         $path =  substr($uri, $index + 3);
 
-        $basePaths = $this->_dm->getConfig('file_base_path');
+        $basePaths = $this->_dm->getConfig('file_base_url');
 
         return $basePaths[$stream] . $path;
     }
