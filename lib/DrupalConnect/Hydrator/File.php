@@ -8,8 +8,6 @@ use \DrupalConnect\Mapping\TypeManager as TypeManager;
  */
 class File extends AbstractHydrator
 {
-    const CUSTOM_FIELD_PREFIX = 'field_';
-
     /**
      * Get the hydrated version of the document.
      *
@@ -38,6 +36,7 @@ class File extends AbstractHydrator
 
         if (isset($data['uri']))
         {
+            $file->setUri(TypeManager::getType('string')->convertToPHPValue($data['uri']));
             $file->setUrl(TypeManager::getType('string')->convertToPHPValue($this->_convertUriStreamToFullUrl($data['uri'])));
         }
 
@@ -65,19 +64,20 @@ class File extends AbstractHydrator
     }
 
     /**
-     * Convert a stream uri like public://avatar.jpg to http://drupal.com/sites/default/files/avatar.jpg
+     * Convert a scheme:://target URI like public://avatar.jpg to http://drupal.com/sites/default/files/avatar.jpg
      *
+     * @see http://api.drupal.org/api/drupal/includes%21file.inc/function/file_uri_scheme/7
      * @param string $uri
      * @return string
      */
     protected function _convertUriStreamToFullUrl($uri)
     {
         $index = strpos($uri, '://');
-        $stream = substr($uri, 0, $index);
-        $path =  substr($uri, $index + 3);
+        $scheme = substr($uri, 0, $index);
+        $target =  substr($uri, $index + 3);
 
         $basePaths = $this->_dm->getConfig('file_base_url');
 
-        return $basePaths[$stream] . $path;
+        return $basePaths[$scheme] . $target;
     }
 }

@@ -4,7 +4,7 @@ namespace DrupalConnect\Document;
 /**
  * Representation of a File document (or entity) in Drupal
  */
-class File
+class File extends AbstractDocument
 {
     /**
      * Numeric id for a file. This should always be the unique idenitifier
@@ -26,6 +26,13 @@ class File
      * @var string
      */
     protected $_name;
+
+    /**
+     * The URI to access the file (either local or remote) with the target://scheme
+     *
+     * @var string
+     */
+    protected $_uri;
 
     /**
      * The Full URL to access the file
@@ -210,6 +217,24 @@ class File
     public function getMime()
     {
         return $this->_mime;
+    }
+
+    /**
+     * @param string $uri
+     * @return \DrupalConnect\Document\File
+     */
+    public function setUri($uri)
+    {
+        $this->_uri = $uri;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getUri()
+    {
+        return $this->_uri;
     }
 
     // ----------- Additional Getters + Setters + Functionality ----------------------
