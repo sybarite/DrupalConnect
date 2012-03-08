@@ -7,6 +7,7 @@ class Query
 
     const DOCUMENT_TYPE_NODE = 'DrupalConnect\Document\Node';
     const DOCUMENT_TYPE_FILE = 'DrupalConnect\Document\File';
+    const DOCUMENT_TYPE_FILE_IMAGE = 'DrupalConnect\Document\File\Image';
 
     /**
      * Array containing the query data.
@@ -84,7 +85,7 @@ class Query
     }
 
     /**
-     * Deals with processing a
+     * Deals with processing a Node Find
      *
      * @return Cursor|null
      */
@@ -244,12 +245,14 @@ class Query
     }
 
     /**
-     * Deals with processing a
+     * Deals with processing a File or File\Image FIND
      *
      * @return Cursor|null
      */
     protected function _executeFileFind()
     {
+        $isImage = ($this->_documentName === self::DOCUMENT_TYPE_FILE_IMAGE || is_subclass_of($this->_documentName, self::DOCUMENT_TYPE_FILE_IMAGE));
+
         // if no VIEW selected
         if (!$this->_query['useView'])
         {
@@ -263,6 +266,12 @@ class Query
 
 
                 $request->setParameterGet('file_contents', 0);
+
+                if ($isImage)
+                {
+                    // do not get the image styles for now
+                    $request->setParameterGet('image_styles', 0);
+                }
 
                 $response = $request->request('GET');
 
@@ -303,13 +312,13 @@ class Query
                 if (count($this->_query['select']) > 0)
                 {
                     /**
-                     * Note:
-                     * 1 > Even if the fields are explicitly selected, the 'nid' must always be returned.
-                     *       This is not just important because it's the primary identifier but also because for some reason it makes
-                     *       the time taken for drupal to return results faster.
-                     *
-                     * 2 > Whether you like it or not, drupal will for some reason always return the 'uri' field.
-                     */
+                                 * Note:
+                                 * 1 > Even if the fields are explicitly selected, the 'nid' must always be returned.
+                                 *       This is not just important because it's the primary identifier but also because for some reason it makes
+                                 *       the time taken for drupal to return results faster.
+                                 *
+                                 * 2 > Whether you like it or not, drupal will for some reason always return the 'uri' field.
+                                 */
                     $this->_query['select']['fid'] = 1;
                     $request->setParameterGet('fields', implode(',', array_keys($this->_query['select'])) );
                 }
@@ -412,7 +421,14 @@ class Query
             }
 
             // wrap with cursor, BUT USE a CUSTOM HYDRATOR since Node data from views has a different representation
-            return $this->_wrapCursor($nodeSetData, 'DrupalConnect\Hydrator\Views\File');
+            if ($isImage)
+            {
+                return $this->_wrapCursor($nodeSetData, 'DrupalConnect\Hydrator\Views\File\Image');
+            }
+            else
+            {
+                return $this->_wrapCursor($nodeSetData, 'DrupalConnect\Hydrator\Views\File');
+            }
         }
     }
 
@@ -431,7 +447,11 @@ class Query
 
         if ($hydrator)
         {
-            $cursor->setHydrator(new $hydrator($this->_documentName));
+            /**
+                     * @var \DrupalConnect\Hydrator $hydrator
+                     */
+            $hydrator = new $hydrator($this->_dm, $this->_documentName);
+            $cursor->setHydrator($hydrator);
         }
 
         return $cursor;
