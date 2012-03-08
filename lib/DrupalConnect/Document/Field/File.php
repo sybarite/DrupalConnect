@@ -38,7 +38,7 @@ class File implements \DrupalConnect\Document\Field
     /**
      * @var int
      */
-    protected $_fileSize;
+    protected $_size;
 
     /**
      * @var \DateTime
@@ -79,12 +79,68 @@ class File implements \DrupalConnect\Document\Field
         }
         if (isset($data['filesize']))
         {
-            $this->_fileSize = (int)$data['filesize'];
+            $this->_size = (int)$data['filesize'];
         }
         if (isset($data['timestamp']))
         {
             $this->_time = TypeManager::getType('date')->convertToPHPValue($data['timestamp']);
         }
+    }
+
+    /**
+     * @return int
+     */
+    public function getId()
+    {
+        return $this->_id;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDescription()
+    {
+        return $this->_description;
+    }
+
+    /**
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->_name;
+    }
+
+    /**
+     * @return string
+     */
+    public function getUri()
+    {
+        return $this->_uri;
+    }
+
+    /**
+     * @return string
+     */
+    public function getMime()
+    {
+        return $this->_mime;
+    }
+
+    /**
+     * @return int
+     */
+    public function getSize()
+    {
+        return $this->_size;
+    }
+
+    /**
+     * @return \DateTime|mixed
+     */
+    public function getTime()
+    {
+        return $this->_time;
     }
 
     // ----------- Additional Getters + Setters + Functionality ----------------------
