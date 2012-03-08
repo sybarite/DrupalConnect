@@ -651,11 +651,54 @@ class Node extends AbstractDocument
         return $this->getField($fieldName, $index, $options);
     }
 
+    /**
+     * Get a custom file field
+     *
+     * @param $fieldName
+     * @param null|int $index
+     * @param array $options options like language
+     * @return Field\File|Field\File[]|null
+     */
     public function getFileField($fieldName, $index = null, array $options = array())
     {
         $options['type'] = 'DrupalConnect\Document\Field\File';
         /**
              * @var \DrupalConnect\Document\Field\File|\DrupalConnect\Document\Field\File[] $fileField
+             */
+        $fileField = $this->getField($fieldName, $index, $options);
+
+        if ($fileField)
+        {
+            // set the base URLS so file fields can create the FULL URL
+            if (is_array($fileField))
+            {
+                foreach ($fileField as $f)
+                {
+                    $f->setFileBaseUrls($this->_fileBaseUrls);
+                }
+            }
+            else
+            {
+                $fileField->setFileBaseUrls($this->_fileBaseUrls);
+            }
+        }
+
+        return $fileField;
+    }
+
+    /**
+     * Get a custom image field
+     *
+     * @param $fieldName
+     * @param null|int $index
+     * @param array $options options like language
+     * @return Field\File\Image|Field\File\Image[]|null
+     */
+    public function getImageField($fieldName, $index = null, array $options = array())
+    {
+        $options['type'] = 'DrupalConnect\Document\Field\File\Image';
+        /**
+             * @var \DrupalConnect\Document\Field\File\Image|\DrupalConnect\Document\Field\File\Image[] $fileField
              */
         $fileField = $this->getField($fieldName, $index, $options);
 
