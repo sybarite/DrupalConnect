@@ -38,7 +38,7 @@ class File extends AbstractHydrator
 
         if (isset($data['uri']))
         {
-            $file->setUri(TypeManager::getType('string')->convertToPHPValue($data['uri']));
+            $file->setUrl(TypeManager::getType('string')->convertToPHPValue($this->_convertUriStreamToFullUrl($data['uri'])));
         }
 
         if (isset($data['filemime']))
@@ -62,5 +62,22 @@ class File extends AbstractHydrator
         }
 
         return $file;
+    }
+
+    /**
+     * Convert a stream uri like public://avatar.jpg to http://drupal.com/sites/default/files/avatar.jpg
+     *
+     * @param string $uri
+     * @return string
+     */
+    protected function _convertUriStreamToFullUrl($uri)
+    {
+        $index = strpos($uri, '://');
+        $stream = substr($uri, 0, $index);
+        $path =  substr($uri, $index + 3);
+
+        $basePaths = $this->_dm->getConfig('file_base_path');
+
+        return $basePaths[$stream] . $path;
     }
 }
