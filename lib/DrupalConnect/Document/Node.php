@@ -17,6 +17,12 @@ class Node extends AbstractDocument
      */
     const LANGUAGE_NONE = 'und';
 
+    /**
+     * Base URLS for the various file streams like public, private, etc
+     *
+     * @var array
+     */
+    protected $_fileBaseUrls;
 
     /**
      * The numeric ID for a node. This should always be a unique identifier
@@ -560,6 +566,19 @@ class Node extends AbstractDocument
         }
     }
 
+    /**
+     * Set the file base URLS
+     * DO NOT CALL THIS FUNCTION DIRECTLY... the hydrator will call it!
+     *
+     * @param array $fileBaseUrls
+     * @return \DrupalConnect\Document\File\Image
+     */
+    public function setFileBaseUrls($fileBaseUrls)
+    {
+        $this->_fileBaseUrls = $fileBaseUrls;
+        return $this;
+    }
+
     // ----------- Functionality for getting fields of Particular Type ----------------------
 
     /**
@@ -630,6 +649,33 @@ class Node extends AbstractDocument
     {
         $options['type'] = 'DrupalConnect\Document\Field\Boolean';
         return $this->getField($fieldName, $index, $options);
+    }
+
+    public function getFileField($fieldName, $index = null, array $options = array())
+    {
+        $options['type'] = 'DrupalConnect\Document\Field\File';
+        /**
+             * @var \DrupalConnect\Document\Field\File|\DrupalConnect\Document\Field\File[] $fileField
+             */
+        $fileField = $this->getField($fieldName, $index, $options);
+
+        if ($fileField)
+        {
+            // set the base URLS so file fields can create the FULL URL
+            if (is_array($fileField))
+            {
+                foreach ($fileField as $f)
+                {
+                    $f->setFileBaseUrls($this->_fileBaseUrls);
+                }
+            }
+            else
+            {
+                $fileField->setFileBaseUrls($this->_fileBaseUrls);
+            }
+        }
+
+        return $fileField;
     }
 
     // ----------- Functionality for getting VALUES of a Particular Field Type ----------------------

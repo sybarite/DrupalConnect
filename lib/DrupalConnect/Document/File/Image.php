@@ -27,15 +27,6 @@ class Image extends \DrupalConnect\Document\File
     }
 
     /**
-     * @return array
-     */
-    public function getFileBaseUrls()
-    {
-        return $this->_fileBaseUrls;
-    }
-
-
-    /**
      * Get the URL to the Original image or one of the styles
      *
      * @param string|null $styleName Style for the image (optional)

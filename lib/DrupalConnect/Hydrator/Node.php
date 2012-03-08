@@ -127,6 +127,8 @@ class Node extends AbstractHydrator
             }
         }
 
+        // set the base urls so the File document can generate URLs for the image styles requested
+        $node->setFileBaseUrls($this->_dm->getConfig('file_base_url'));
 
         return $node;
     }
