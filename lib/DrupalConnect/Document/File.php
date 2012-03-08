@@ -28,11 +28,11 @@ class File
     protected $_name;
 
     /**
-     * The URI to access the file (either local or remote).
+     * The Full URL to access the file
      *
      * @var string
      */
-    protected $_uri;
+    protected $_url;
 
     /**
      * The file's MIME type.
@@ -159,18 +159,20 @@ class File
      * @param string $uri
      * @return \DrupalConnect\Document\File
      */
-    public function setUri($uri)
+    public function setUrl($uri)
     {
-        $this->_uri = $uri;
+        $this->_url = $uri;
         return $this;
     }
 
     /**
+     * Get the full URL to this File
+     *
      * @return string
      */
-    public function getUri()
+    public function getUrl()
     {
-        return $this->_uri;
+        return $this->_url;
     }
 
     /**
