@@ -10,7 +10,7 @@ namespace DrupalConnect\Repository;
 class File extends AbstractRepository
 {
     /**
-     *
+     * Get a file by its id
      *
      * @param int $fid
      * @return null|\DrupalConnect\Document\File
