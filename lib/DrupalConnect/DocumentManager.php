@@ -39,7 +39,7 @@ class DocumentManager
     protected $_documentRepositoryMapping = array(
         'DrupalConnect\Document\Node' => 'DrupalConnect\Repository\Node',
         'DrupalConnect\Document\File' => 'DrupalConnect\Repository\File',
-        'DrupalConnect\Document\File\Image' => 'DrupalConnect\Repository\Image'
+        'DrupalConnect\Document\File\Image' => 'DrupalConnect\Repository\File\Image'
     );
 
     /**
