@@ -38,7 +38,8 @@ class DocumentManager
      */
     protected $_documentRepositoryMapping = array(
         'DrupalConnect\Document\Node' => 'DrupalConnect\Repository\Node',
-        'DrupalConnect\Document\File' => 'DrupalConnect\Repository\File'
+        'DrupalConnect\Document\File' => 'DrupalConnect\Repository\File',
+        'DrupalConnect\Document\File\Image' => 'DrupalConnect\Repository\Image'
     );
 
     /**
@@ -48,15 +49,23 @@ class DocumentManager
      */
     protected $_documentHydratorMapping = array(
         'DrupalConnect\Document\Node' => 'DrupalConnect\Hydrator\Node',
-        'DrupalConnect\Document\File' => 'DrupalConnect\Hydrator\File'
+        'DrupalConnect\Document\File' => 'DrupalConnect\Hydrator\File',
+        'DrupalConnect\Document\File\Image' => 'DrupalConnect\Hydrator\File\Image'
     );
 
     /**
-     * @param Connection $connection
+     * @var array
      */
-    public function __construct(\DrupalConnect\Connection $connection)
+    protected $_config;
+
+    /**
+     * @param Connection $connection
+     * @param array $config
+     */
+    public function __construct(\DrupalConnect\Connection $connection, array $config)
     {
         $this->_connection = $connection;
+        $this->_config = $config;
     }
 
     /**
@@ -109,7 +118,20 @@ class DocumentManager
             throw new Exception("No registered Hydrator for document name: $documentName");
         }
 
-        return new $this->_documentHydratorMapping[$documentName]($documentName);
+        return new $this->_documentHydratorMapping[$documentName]($this, $documentName);
+    }
+
+    /**
+     * @param null|string $key
+     * @return array
+     */
+    public function getConfig($key = null)
+    {
+        if ($key)
+        {
+            return isset($this->_config[$key]) ? $this->_config[$key] : null;
+        }
+        return $this->_config;
     }
 
 
