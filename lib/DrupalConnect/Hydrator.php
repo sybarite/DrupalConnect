@@ -7,9 +7,10 @@ namespace DrupalConnect;
 interface Hydrator
 {
     /**
+     * @param \DrupalConnect\DocumentManager $dm
      * @param string $documentName
      */
-    public function __construct($documentName);
+    public function __construct(\DrupalConnect\DocumentManager $dm, $documentName);
 
     /**
      * Get a hydrated version of the document.
