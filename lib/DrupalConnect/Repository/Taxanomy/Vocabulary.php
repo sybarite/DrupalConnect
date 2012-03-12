@@ -75,12 +75,19 @@ class Vocabulary extends \DrupalConnect\Repository\AbstractRepository
             }
         }
 
-        $results = $qb->getQuery()->execute();
+        $partialVocabularies = $qb->getQuery()->execute();
 
-        if (!$results)
+        if (!$partialVocabularies)
             return null;
 
-        return $results->toArray();
+        $fullVocabularies = array();
+
+        foreach ($partialVocabularies as $pNode)
+        {
+            $fullVocabularies[] = $pNode;
+        }
+
+        return $fullVocabularies;
     }
 
     /**
