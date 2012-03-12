@@ -74,7 +74,7 @@ class File extends AbstractHydrator
     {
         $index = strpos($uri, '://');
         $scheme = substr($uri, 0, $index);
-        $target =  substr($uri, $index + 3);
+        $target = urlencode(substr($uri, $index + 3));
 
         $basePaths = $this->_dm->getConfig('file_base_url');
 

@@ -84,7 +84,9 @@ class Image extends \DrupalConnect\Document\Field\File
 
         $index = strpos($uri, '://');
         $scheme = substr($uri, 0, $index);
-        $target =  substr($uri, $index + 3);
+        $target =  urlencode(substr($uri, $index + 3));
+
+        $styleName = urlencode($styleName);
 
         if ($scheme === 'public')
         {

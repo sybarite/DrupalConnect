@@ -61,11 +61,27 @@ class DocumentManager
     /**
      * @param Connection $connection
      * @param array $config
+     * @throws Exception
      */
     public function __construct(\DrupalConnect\Connection $connection, array $config)
     {
         $this->_connection = $connection;
         $this->_config = $config;
+
+        if (!isset($config['file_base_url']))
+        {
+            throw new Exception('file_base_url not set in configuration');
+        }
+
+        if (!isset($config['file_base_url']['public']))
+        {
+            throw new Exception('file_base_url.public not set in configuration');
+        }
+
+        if (!isset($config['file_base_url']['private']))
+        {
+            throw new Exception('file_base_url.private not set in configuration');
+        }
     }
 
     /**
@@ -108,8 +124,8 @@ class DocumentManager
      * Get the Hydrator for a Document Type
      *
      * @param $documentName
-     * @return Hydrator
      * @throws Exception
+     * @return Hydrator
      */
     public function getHydrator($documentName)
     {

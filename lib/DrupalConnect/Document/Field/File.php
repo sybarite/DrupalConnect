@@ -180,9 +180,8 @@ class File implements \DrupalConnect\Document\Field
     {
         $index = strpos($uri, '://');
         $scheme = substr($uri, 0, $index);
-        $target =  substr($uri, $index + 3);
+        $target =  urlencode(substr($uri, $index + 3));
 
-        var_dump($this->_fileBaseUrls);
         return $this->_fileBaseUrls[$scheme] . $target;
     }
 }
