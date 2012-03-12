@@ -105,6 +105,9 @@ class Node extends \DrupalConnect\Hydrator\AbstractHydrator
             }
         }
 
+        // set the base urls so that file/image fields can generate URLs required
+        $node->setFileBaseUrls($this->_dm->getConfig('file_base_url'));
+
         return $node;
     }
 }
