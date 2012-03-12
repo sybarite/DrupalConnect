@@ -11,6 +11,9 @@ class Request extends \Zend_Http_Client
     const ENDPOINT_FILE_RESOURCE_RETRIEVE = 'file/'; // example node/1.json
     const ENDPOINT_FILE_RESOURCE_INDEX = 'file';
 
+    const ENDPOINT_FILE_TAXAONOMY_VOCABULARY_RETRIEVE = 'taxonomy_vocabulary/'; // example taxonomy_vocabulary/1.json
+    const ENDPOINT_FILE_TAXAONOMY_VOCABULARY_INDEX = 'taxonomy_vocabulary';
+
     public function __construct()
     {
         parent::__construct(null, array(

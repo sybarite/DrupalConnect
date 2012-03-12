@@ -8,6 +8,7 @@ class Query
     const DOCUMENT_TYPE_NODE = 'DrupalConnect\Document\Node';
     const DOCUMENT_TYPE_FILE = 'DrupalConnect\Document\File';
     const DOCUMENT_TYPE_FILE_IMAGE = 'DrupalConnect\Document\File\Image';
+    const DOCUMENT_TYPE_TAXANOMY_VOCABULARY = 'DrupalConnect\Document\Taxanomy\Vocabulary';
 
     /**
      * Array containing the query data.
@@ -72,6 +73,11 @@ class Query
                     is_subclass_of($this->_documentName, self::DOCUMENT_TYPE_FILE))
                 {
                     return $this->_executeFileFind();
+                }
+                elseif ($this->_documentName === self::DOCUMENT_TYPE_TAXANOMY_VOCABULARY ||
+                    is_subclass_of($this->_documentName, self::DOCUMENT_TYPE_TAXANOMY_VOCABULARY))
+                {
+                    return $this->_executeVocabularyFind();
                 }
                 else
                 {
@@ -431,6 +437,98 @@ class Query
             }
         }
     }
+
+    /**
+     * Deals with processing a Vocabulary Find
+     *
+     * @return Cursor|null
+     */
+    protected function _executeVocabularyFind()
+    {
+        // if querying by vid, then use the $endpoint/taxonomy_vocabulary/vid.json where only ONE result is returned
+        if (isset($this->_query['parameters']['vid']) && $this->_query['parameters']['vid']['type'] === 'equals')
+        {
+            $requestUrl = $this->_connection->getEndpoint() . \DrupalConnect\Connection\Request::ENDPOINT_FILE_TAXAONOMY_VOCABULARY_RETRIEVE . $this->_query['parameters']['vid']['value'] . '.json';
+
+            $response = $this->_httpClient->resetParameters(true)
+                                          ->setUri($requestUrl)
+                                          ->request('GET');
+
+            $singleVocabulary = json_decode($response->getBody(), true);
+
+            if (!$singleVocabulary) // if false or null
+            {
+                return null;
+            }
+
+            return $this->_wrapCursor(array($singleVocabulary)); // return an array with 1 item node
+        }
+        else // multiple results possible, so use the node index $endpoint/taxaonomy_vocabulary.json?...
+        {
+            $requestUrl = $this->_connection->getEndpoint() . \DrupalConnect\Connection\Request::ENDPOINT_FILE_TAXAONOMY_VOCABULARY_INDEX . '.json';
+
+            $request = $this->_httpClient->resetParameters(true)
+                                         ->setUri($requestUrl);
+
+            foreach ($this->_query['parameters'] as $field => $param)
+            {
+                if ($param['type'] === 'equals')
+                {
+                    $request->setParameterGet("parameters[$field]", $this->_convertToDrupalValue($param['value']) );
+                }
+                else if ($param['type'] === 'in')
+                {
+                    foreach ($param['value'] as $key => $val) // convert the IN values to drupal equivalent values first
+                    {
+                        $param['value'][$key] = $this->_convertToDrupalValue($val);
+                    }
+
+                    $request->setParameterGet("parameters[$field]", implode(',', $param['value']) );
+                }
+            }
+
+            // if fields to be selected is explicitly defined
+            if (count($this->_query['select']) > 0)
+            {
+                /**
+                                 * Note:
+                                 * 1 > Even if the fields are explicitly selected, the 'nid' must always be returned.
+                                 *       This is not just important because it's the primary identifier but also because for some reason it makes
+                                 *       the time taken for drupal to return results faster.
+                                 *
+                                 * 2 > Whether you like it or not, drupal will for some reason always return the 'uri' field.
+                                 */
+                $this->_query['select']['vid'] = 1;
+                $request->setParameterGet('fields', implode(',', array_keys($this->_query['select'])) );
+            }
+
+            // set the page size
+            if ($this->_query['pageSize'])
+            {
+                $request->setParameterGet('pagesize', $this->_query['pageSize']);
+            }
+
+            // set the page number
+            if ($this->_query['page'])
+            {
+                $request->setParameterGet('page', $this->_query['page']);
+            }
+
+
+            $response = $request->request('GET');
+
+            $vocabularySetData = (json_decode($response->getBody(), true));
+
+            if (!$vocabularySetData || !is_array($vocabularySetData))
+            {
+                return null;
+            }
+
+            return $this->_wrapCursor($vocabularySetData);
+
+        }
+    }
+
 
     /**
      * Wrap an iterable cursor around the data

@@ -39,7 +39,8 @@ class DocumentManager
     protected $_documentRepositoryMapping = array(
         'DrupalConnect\Document\Node' => 'DrupalConnect\Repository\Node',
         'DrupalConnect\Document\File' => 'DrupalConnect\Repository\File',
-        'DrupalConnect\Document\File\Image' => 'DrupalConnect\Repository\File\Image'
+        'DrupalConnect\Document\File\Image' => 'DrupalConnect\Repository\File\Image',
+        'DrupalConnect\Document\Taxanomy\Vocabulary' => 'DrupalConnect\Repository\Taxanomy\Vocabulary',
     );
 
     /**
@@ -50,7 +51,8 @@ class DocumentManager
     protected $_documentHydratorMapping = array(
         'DrupalConnect\Document\Node' => 'DrupalConnect\Hydrator\Node',
         'DrupalConnect\Document\File' => 'DrupalConnect\Hydrator\File',
-        'DrupalConnect\Document\File\Image' => 'DrupalConnect\Hydrator\File\Image'
+        'DrupalConnect\Document\File\Image' => 'DrupalConnect\Hydrator\File\Image',
+        'DrupalConnect\Document\Taxanomy\Vocabulary' => 'DrupalConnect\Hydrator\Taxanomy\Vocabulary',
     );
 
     /**
