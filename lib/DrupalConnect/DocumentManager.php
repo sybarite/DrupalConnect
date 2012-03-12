@@ -41,6 +41,7 @@ class DocumentManager
         'DrupalConnect\Document\File' => 'DrupalConnect\Repository\File',
         'DrupalConnect\Document\File\Image' => 'DrupalConnect\Repository\File\Image',
         'DrupalConnect\Document\Taxanomy\Vocabulary' => 'DrupalConnect\Repository\Taxanomy\Vocabulary',
+        'DrupalConnect\Document\Taxanomy\Term' => 'DrupalConnect\Repository\Taxanomy\Term',
     );
 
     /**
@@ -53,6 +54,7 @@ class DocumentManager
         'DrupalConnect\Document\File' => 'DrupalConnect\Hydrator\File',
         'DrupalConnect\Document\File\Image' => 'DrupalConnect\Hydrator\File\Image',
         'DrupalConnect\Document\Taxanomy\Vocabulary' => 'DrupalConnect\Hydrator\Taxanomy\Vocabulary',
+        'DrupalConnect\Document\Taxanomy\Term' => 'DrupalConnect\Hydrator\Taxanomy\Term',
     );
 
     /**
