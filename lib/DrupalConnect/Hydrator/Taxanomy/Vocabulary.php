@@ -22,7 +22,7 @@ class Vocabulary extends \DrupalConnect\Hydrator\AbstractHydrator
         $vocabulary = new $this->_documentName();
 
         // vid is (and must be) always returned
-        $vocabulary->setVid(TypeManager::getType('integer')->convertToPHPValue($data['vid']));
+        $vocabulary->setVocabularyId(TypeManager::getType('integer')->convertToPHPValue($data['vid']));
 
         if (isset($data['name']))
         {

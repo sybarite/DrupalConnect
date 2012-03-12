@@ -11,7 +11,7 @@ class Vocabulary extends \DrupalConnect\Document\AbstractDocument
      *
      * @var int
      */
-    protected $_vid;
+    protected $_vocabularyId;
 
     /**
      * Name of the vocabulary.
@@ -150,18 +150,18 @@ class Vocabulary extends \DrupalConnect\Document\AbstractDocument
      * @param int $vid
      * @return Vocabulary
      */
-    public function setVid($vid)
+    public function setVocabularyId($vid)
     {
-        $this->_vid = $vid;
+        $this->_vocabularyId = $vid;
         return $this;
     }
 
     /**
      * @return int
      */
-    public function getVid()
+    public function getVocabularyId()
     {
-        return $this->_vid;
+        return $this->_vocabularyId;
     }
 
     /**
