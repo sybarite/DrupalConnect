@@ -114,7 +114,7 @@ class Query
                 $response = $this->_httpClient->resetParameters(true)
                                               ->setUri($requestUrl)
                                               ->request('GET');
-                $this->_validateServerError($response);
+                $this->_validateServerResponse($response);
 
                 $singleNode = json_decode($response->getBody(), true);
 
@@ -179,7 +179,7 @@ class Query
 
                 $response = $request->request('GET');
 
-                $this->_validateServerError($response);
+                $this->_validateServerResponse($response);
 
                 $nodeSetData = (json_decode($response->getBody(), true));
 
@@ -247,7 +247,7 @@ class Query
 
             $response = $request->request('GET');
 
-            $this->_validateServerError($response);
+            $this->_validateServerResponse($response);
 
             $nodeSetData = (json_decode($response->getBody(), true));
 
@@ -292,7 +292,7 @@ class Query
 
                 $response = $request->request('GET');
 
-                $this->_validateServerError($response);
+                $this->_validateServerResponse($response);
 
                 $singleFile = json_decode($response->getBody(), true);
 
@@ -357,7 +357,7 @@ class Query
 
                 $response = $request->request('GET');
 
-                $this->_validateServerError($response);
+                $this->_validateServerResponse($response);
 
                 $nodeSetData = (json_decode($response->getBody(), true));
 
@@ -434,7 +434,7 @@ class Query
 
             $response = $request->request('GET');
 
-            $this->_validateServerError($response);
+            $this->_validateServerResponse($response);
 
             $nodeSetData = (json_decode($response->getBody(), true));
 
@@ -471,7 +471,7 @@ class Query
                                           ->setUri($requestUrl)
                                           ->request('GET');
 
-            $this->_validateServerError($response);
+            $this->_validateServerResponse($response);
 
             $singleVocabulary = json_decode($response->getBody(), true);
 
@@ -536,7 +536,7 @@ class Query
 
             $response = $request->request('GET');
 
-            $this->_validateServerError($response);
+            $this->_validateServerResponse($response);
 
             $vocabularySetData = (json_decode($response->getBody(), true));
 
@@ -569,7 +569,7 @@ class Query
                                               ->setUri($requestUrl)
                                               ->request('GET');
 
-                $this->_validateServerError($response);
+                $this->_validateServerResponse($response);
 
                 $singleTerm = json_decode($response->getBody(), true);
 
@@ -634,7 +634,7 @@ class Query
 
                 $response = $request->request('GET');
 
-                $this->_validateServerError($response);
+                $this->_validateServerResponse($response);
 
                 $termSetData = (json_decode($response->getBody(), true));
 
@@ -702,7 +702,7 @@ class Query
 
             $response = $request->request('GET');
 
-            $this->_validateServerError($response);
+            $this->_validateServerResponse($response);
             
 
             $termSetData = (json_decode($response->getBody(), true));
@@ -844,16 +844,11 @@ class Query
      * @param $response \Zend_Http_Response
      * @throws \DrupalConnect\Query\Exception
      */
-    protected function _validateServerError($response)
+    protected function _validateServerResponse($response)
     {
-        if($response->getStatus() == 500)
+        if ($response->isError())
         {
-            throw new \DrupalConnect\Query\Exception($response->getMessage());
-        }
-
-        if($response->getStatus() == 503)
-        {
-            echo $response->getBody();die;
+            throw new \DrupalConnect\Connection\Exception($response->getMessage(), $response->getStatus());
         }
     }
 }
