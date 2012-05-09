@@ -148,7 +148,7 @@ class AbstractFieldSupport extends AbstractDocument
      * @param string $fieldName
      * @param null|int $index
      * @param array $options Field options like language
-     * @return Field\Text[]|Field\Text|null
+     * @return Field\TextWithSummary[]|Field\TextWithSummary|null
      */
     public function getTextWithSummaryField($fieldName, $index = null, array $options = array())
     {
